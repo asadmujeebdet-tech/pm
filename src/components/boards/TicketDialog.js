@@ -198,6 +198,8 @@ function TicketForm({
 }) {
   const [description, setDescription] = useState(card.description || '');
   const [appId, setAppId] = useState(card.app_id || '');
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const fileInputRef = useRef(null);
   const initialAssignedIds = card.assignees?.length
     ? card.assignees.map((member) => member.id)
     : card.assignee_id ? [card.assignee_id] : [];
@@ -247,14 +249,52 @@ function TicketForm({
         <fieldset disabled={pending} className="space-y-3 rounded-xl border border-[var(--border)] p-4">
           <legend className="px-1 text-sm font-semibold text-[var(--foreground)]">Files and links</legend>
           <div>
-            <label htmlFor="create-ticket-file" className="mb-1.5 block text-sm font-medium text-[var(--foreground)]">Attach a file</label>
+            <label htmlFor="create-ticket-file" className="mb-1.5 block text-sm font-medium text-[var(--foreground)]">Attach files</label>
             <input
+              ref={fileInputRef}
               id="create-ticket-file"
-              name="file"
+              name="files"
               type="file"
-              className="field min-h-11 file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--primary-soft)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[var(--primary)]"
+              multiple
+              disabled={pending || selectedFiles.length >= 10}
+              onChange={(event) => {
+                const incoming = Array.from(event.target.files || []);
+                setSelectedFiles((current) => {
+                  const next = [...current];
+                  for (const file of incoming) {
+                    if (next.length >= 10) break;
+                    if (!next.some((item) => item.name === file.name && item.size === file.size && item.lastModified === file.lastModified)) next.push(file);
+                  }
+                  return next;
+                });
+                event.target.value = '';
+              }}
+              className="field min-h-11 file:mr-3 file:rounded-lg file:file:border-0 file:bg-[var(--primary-soft)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[var(--primary)]"
             />
-            <p className="mt-1.5 text-xs text-[var(--muted)]">Images up to 10 MB; other files up to 50 MB.</p>
+            <p className="mt-1.5 text-xs text-[var(--muted)]">Select multiple files (up to 10). Images up to 10 MB each; other files up to 50 MB each.</p>
+            {selectedFiles.length > 0 && (
+              <ul className="mt-3 space-y-2" aria-label="Selected attachments">
+                {selectedFiles.map((file, index) => (
+                  <li key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--neutral)] px-3 py-2.5 shadow-sm transition-all duration-200 hover:-translate-y-px hover:border-[var(--primary)] hover:shadow-md">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--primary-soft)] text-[var(--primary)]"><Paperclip size={16} aria-hidden="true" /></span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium text-[var(--foreground)]">{file.name}</span>
+                      <span className="block text-xs text-[var(--muted)]">{fileSize(file.size)}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFiles((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                      disabled={pending}
+                      className="btn btn-ghost btn-icon min-h-9 min-w-9 text-rose-600 transition-colors hover:bg-rose-500/10 hover:text-rose-700"
+                      aria-label={`Remove ${file.name}`}
+                      title="Remove file"
+                    >
+                      <Trash2 size={15} aria-hidden="true" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <TextField label="Link title" name="linkTitle" maxLength={120} placeholder="Design file" />
@@ -265,7 +305,7 @@ function TicketForm({
       )}
       {error && <FormMessage state={{ success: false, message: error }} />}
       {showActions && (
-        <div className="flex flex-col-reverse justify-end gap-2 border-t border-[var(--border)] pt-4 sm:flex-row">
+        <div className="flex items-center justify-end gap-2 border-t border-[var(--border)] pt-4">
           <button type="button" onClick={onCancel} disabled={pending} className="btn btn-secondary">Cancel</button>
           <button type="submit" disabled={pending} className="btn btn-primary">
             {pending ? 'Saving…' : submitLabel}
