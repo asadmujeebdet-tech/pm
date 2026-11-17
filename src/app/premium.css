@@ -118,3 +118,62 @@ html[data-theme='dark'] .board-column-tone-5 { background-color: var(--neutral);
 @media (prefers-reduced-motion: reduce) {
   .login-layout, .login-showcase .login-brand, .login-showcase-copy, .login-board-preview, .login-card-wrap { animation: none; }
 }
+
+/* Sign-in page refinements */
+.login-page { padding-block: clamp(1.25rem, 4vh, 2.5rem); }
+.login-backdrop {
+  background:
+    radial-gradient(ellipse at 18% 15%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 38%),
+    radial-gradient(ellipse at 84% 82%, rgba(112, 91, 220, 0.12), transparent 34%);
+  background-size: 150% 150%;
+  animation: login-backdrop-drift 18s ease-in-out infinite alternate;
+}
+.login-shell { width: min(100%, 37.5rem); gap: clamp(1.5rem, 4vh, 2.25rem); }
+.login-brand { gap: 0.85rem; font-size: 1.1rem; }
+.login-logo {
+  width: 3.15rem;
+  height: 3.15rem;
+  border-color: color-mix(in srgb, var(--primary) 22%, transparent);
+  border-radius: 1rem;
+  background: linear-gradient(145deg, #788cff, #5263d9);
+  color: #fff;
+  box-shadow: 0 12px 26px -12px color-mix(in srgb, var(--primary) 75%, transparent);
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+.login-brand:hover .login-logo { transform: translateY(-2px) rotate(-2deg); box-shadow: 0 16px 30px -12px color-mix(in srgb, var(--primary) 80%, transparent); }
+.login-card {
+  padding: clamp(2rem, 5vw, 2.75rem);
+  border-radius: 1.4rem;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.16), 0 2px 8px rgba(15, 23, 42, 0.07);
+  animation: login-card-in 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.login-eyebrow { font-size: 0.75rem; letter-spacing: 0.16em; }
+.login-card h1 { margin-top: 0.7rem; font-size: clamp(2.15rem, 4vw, 2.6rem); line-height: 1.08; }
+.login-description { margin-top: 0.7rem; color: var(--muted); font-size: 1rem; line-height: 1.55; }
+.login-form-slot { margin-top: 1.75rem; }
+.login-card .login-form label { margin-bottom: 0.65rem; font-size: 1rem; font-weight: 600; }
+.login-card .login-form .field { min-height: 3.6rem; border-radius: 0.8rem; font-size: 1.05rem; }
+.login-card .login-form .field-icon { width: 1.2rem; height: 1.2rem; }
+.login-card .login-submit { min-height: 3.7rem; border-radius: 0.8rem; font-size: 1.05rem; font-weight: 600; }
+.login-card .login-submit:hover:not(:disabled) { transform: translateY(-2px); }
+@keyframes login-backdrop-drift { from { background-position: 0% 0%; } to { background-position: 100% 100%; } }
+@media (prefers-reduced-motion: reduce) {
+  .login-backdrop, .login-card { animation: none; }
+  .login-logo, .login-card .login-submit { transition: none; }
+}
+@media (max-height: 540px) {
+  .login-page { padding-block: 1rem; }
+  .login-shell { gap: 0.75rem; }
+  .login-brand { font-size: 1rem; }
+  .login-logo { width: 2.6rem; height: 2.6rem; }
+  .login-card { padding: 1.5rem; }
+  .login-card h1 { font-size: 2rem; }
+  .login-form-slot { margin-top: 1rem; }
+  .login-card .login-form { gap: 0.75rem; }
+  .login-card .login-form > div:first-child { gap: 0.65rem; }
+  .login-card .login-form .field, .login-card .login-submit { min-height: 3.1rem; }
+}
+@media (max-width: 380px) {
+  .login-card { padding: 1.5rem; }
+  .login-card h1 { font-size: 2rem; }
+}

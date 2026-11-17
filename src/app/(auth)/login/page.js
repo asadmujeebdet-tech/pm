@@ -30,6 +30,7 @@ async function LoginContent({ searchParams }) {
     <section className="login-card" aria-labelledby="login-title">
       <p className="login-eyebrow">{needsSetup ? 'FIRST-TIME SETUP' : 'SIGN IN'}</p>
       <h1 id="login-title">{needsSetup ? 'Create your account' : 'Welcome back'}</h1>
+      <p className="login-description">{needsSetup ? 'Set up your workspace administrator account.' : 'Sign in to pick up where your team left off.'}</p>
       <div className="login-form-slot">
         {databaseIssue ? (
           <div role="alert" className="login-error">
@@ -67,7 +68,7 @@ export default function LoginPage({ searchParams }) {
       <div aria-hidden="true" className="login-backdrop" />
       <div className="login-shell">
         <header className="login-brand">
-          <span aria-hidden="true" className="login-logo"><KanbanSquare size={18} strokeWidth={2.3} /></span>
+          <span aria-hidden="true" className="login-logo"><KanbanSquare size={22} strokeWidth={2.2} /></span>
           <span>Project Manager</span>
         </header>
         <Suspense fallback={<LoginSkeleton />}>
