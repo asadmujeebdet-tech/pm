@@ -69,13 +69,13 @@ function useTheme() {
 function Brand() {
   return (
     <Link href="/overview" className="flex items-center gap-3 rounded-xl outline-offset-4">
-      <span aria-hidden="true" className="flex h-9 w-9 items-center justify-center rounded-xl bg-[linear-gradient(145deg,var(--primary),#6366f1)] text-xs font-bold tracking-tight text-[var(--primary-foreground)] shadow-[0_6px_18px_-6px_var(--ring)]">
-        PM
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-semibold tracking-tight">Project Manager</span>
-        <span className="mt-0.5 block text-[11px] text-[var(--muted)]">Team workspace</span>
-      </span>
+        <span aria-hidden="true" className="brand-mark flex h-9 w-9 items-center justify-center rounded-xl text-xs font-bold tracking-tight text-white">
+          <KanbanSquare size={17} strokeWidth={2.3} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-semibold tracking-tight">Project Manager</span>
+          <span className="mt-0.5 block text-[11px] text-[var(--muted)]">Your team workspace</span>
+        </span>
       <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[var(--success)] ring-4 ring-[var(--success)]/10" />
     </Link>
   );
@@ -171,7 +171,7 @@ export default function AppShell({ children, user, fullWidth = false }) {
     <div className="min-h-screen bg-[var(--bg)] text-[var(--foreground)]">
       <a href="#main-content" className="skip-link">Skip to content</a>
 
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[var(--sidebar-width)] flex-col border-r border-[var(--border)] bg-[var(--surface)] lg:flex">
+      <aside className="app-sidebar fixed inset-y-0 left-0 z-30 hidden w-[var(--sidebar-width)] flex-col border-r border-[var(--border)] bg-[var(--surface)] lg:flex">
         <SidebarContent groups={groups} activeHref={activeItem?.href} user={user} />
       </aside>
 
@@ -200,7 +200,7 @@ export default function AppShell({ children, user, fullWidth = false }) {
       </div>
 
       <div className="flex min-h-screen flex-col lg:pl-[var(--sidebar-width)]">
-        <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--bg)]/85 backdrop-blur-md">
+        <header className="app-topbar sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--bg)]/85 backdrop-blur-md">
           <div className="mx-auto flex h-16 w-full max-w-[88rem] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
             <div className="flex min-w-0 items-center gap-3">
               <button

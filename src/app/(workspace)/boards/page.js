@@ -47,23 +47,25 @@ async function BoardsContent() {
               search: `${board.name} ${board.app_name || ''} ${board.description || ''}`,
               group: 'all',
               node: (
-                <div
-                  className={`group relative flex min-h-44 w-full flex-col overflow-hidden rounded-xl border border-white/10 p-5 text-white shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-pop)] ${
-                    ['bg-gradient-to-br from-indigo-600 to-violet-800', 'bg-gradient-to-br from-cyan-600 to-blue-800', 'bg-gradient-to-br from-emerald-600 to-teal-800'][index % 3]
-                  }`}
-                >
-                  <Link href={`/boards/${board.id}`} aria-label={`Open ${board.name}`} className="absolute inset-0 z-0 rounded-xl focus-visible:outline-white" />
-                  <span aria-hidden="true" className="pointer-events-none absolute -right-8 -top-10 h-40 w-40 rounded-full border-[24px] border-white/10 transition-transform duration-500 group-hover:scale-110" />
-                  <div className="pointer-events-none relative">
-                    <h2 className="truncate text-lg font-semibold">{board.name}</h2>
-                    <p className="mt-1 truncate text-xs text-white/75">{board.app_name || 'No application'}</p>
-                    {board.description && <p className="mt-2 line-clamp-2 text-sm text-white/80">{board.description}</p>}
+                <article className="board-index-card group relative flex min-h-48 w-full flex-col overflow-hidden rounded-2xl border bg-[var(--surface)] p-5 transition duration-200" style={{ '--board-accent': ['#4f63df', '#1c9a82', '#c47c35', '#8060c7'][index % 4] }}>
+                  <Link href={`/boards/${board.id}`} aria-label={`Open ${board.name}`} className="absolute inset-0 z-[1] rounded-2xl focus-visible:outline-[var(--primary)]" />
+                  <div className="pointer-events-none relative z-0 flex items-center justify-between">
+                    <span className="board-index-mark"><KanbanSquare size={17} aria-hidden="true" /></span>
+                    <span className="board-index-label">Board</span>
                   </div>
-                  <div className="relative z-10 mt-auto flex items-center justify-between gap-2 pt-4 text-xs text-white/80">
-                    {profile.role === 'admin' ? <BoardAdminActions board={board} apps={apps} /> : <span>{board.card_count} {board.card_count === 1 ? 'task' : 'tasks'}</span>}
-                    <ArrowRight size={15} className="pointer-events-none shrink-0 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                  <div className="pointer-events-none relative mt-5">
+                    <h2 className="truncate text-base font-semibold text-[var(--foreground)]">{board.name}</h2>
+                    <p className="mt-1 truncate text-sm text-[var(--muted)]">{board.app_name || 'Workspace board'}</p>
+                    {board.description && <p className="mt-2 line-clamp-2 text-xs leading-5 text-[var(--muted)]">{board.description}</p>}
                   </div>
-                </div>
+                  <div className="relative z-10 mt-auto flex items-center justify-between gap-2 border-t border-[var(--border)] pt-4">
+                    <span className="text-xs font-medium text-[var(--muted)]">{board.card_count} {board.card_count === 1 ? 'task' : 'tasks'}</span>
+                    <span className="flex items-center gap-2">
+                      {profile.role === 'admin' && <BoardAdminActions board={board} apps={apps} />}
+                      <ArrowRight size={16} className="pointer-events-none shrink-0 text-[var(--muted)] transition-transform group-hover:translate-x-1 group-hover:text-[var(--primary)]" aria-hidden="true" />
+                    </span>
+                  </div>
+                </article>
               ),
             }))}
           />
