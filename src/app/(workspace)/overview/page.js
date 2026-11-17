@@ -1,18 +1,25 @@
 import { Suspense } from 'react';
-import { ArrowUpRight, Columns3 } from 'lucide-react';
+import { Columns3 } from 'lucide-react';
 import StageBoard from '@/components/boards/StageBoard';
+import { CreateTicketDialog } from '@/components/boards/TicketDialog';
 import { ActionButton, EmptyState, PageHeader } from '@/components/ui/primitives';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { requireActiveProfile } from '@/lib/auth';
-import { getStageBoard, hasDatabaseConnection } from '@/lib/db';
+import { getApps, getMembers, getStageBoard, getTicketCreationBoards, hasDatabaseConnection } from '@/lib/db';
 
 export const metadata = { title: 'Home' };
 
 async function OverviewContent() {
   const profile = await requireActiveProfile();
-  const data = hasDatabaseConnection()
-    ? await getStageBoard(profile)
-    : { stages: [], cards: [], sectionMap: {} };
+  const connected = hasDatabaseConnection();
+  const [data, boards, apps, members] = connected
+    ? await Promise.all([
+      getStageBoard(profile),
+      getTicketCreationBoards(profile),
+      getApps(profile),
+      profile.role === 'admin' ? getMembers() : Promise.resolve([]),
+    ])
+    : [{ stages: [], cards: [], sectionMap: {} }, [], [], []];
 
   return (
     <>
@@ -20,7 +27,7 @@ async function OverviewContent() {
         eyebrow="Your workspace"
         title="Project stages"
         description="A live view of work across your boards. Find a ticket, follow its progress, or move it to the next stage."
-        actions={<ActionButton href="/boards" variant="secondary">Explore boards <ArrowUpRight size={15} aria-hidden="true" /></ActionButton>}
+        actions={connected && <CreateTicketDialog boards={boards} apps={apps} members={members} canAssignWorkspaceMembers={profile.role === 'admin'} canManageTicketFields={profile.role === 'admin'} />}
       />
       {data.stages.length === 0 ? (
         <EmptyState

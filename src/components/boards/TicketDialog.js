@@ -188,6 +188,11 @@ function TicketForm({
   canManageTicketFields,
   boardAppId,
   sections = [],
+  boardOptions,
+  selectedBoardId,
+  onBoardChange,
+  selectedSectionId,
+  onSectionChange,
   pending,
   onSubmit,
   onCancel,
@@ -224,7 +229,16 @@ function TicketForm({
 
   return (
     <form id={formId} onSubmit={onSubmit} className="space-y-4">
-      {!card.id && <input type="hidden" name="sectionId" value={card.section_id || sections[0]?.id || ''} />}
+      {!card.id && boardOptions?.length ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <SelectField label="Board" value={selectedBoardId} onChange={(event) => onBoardChange(event.target.value)} disabled={pending} required>
+            {boardOptions.map((board) => <option key={board.id} value={board.id}>{board.name}</option>)}
+          </SelectField>
+          <SelectField label="List" name="sectionId" value={selectedSectionId} onChange={(event) => onSectionChange(event.target.value)} disabled={pending} required>
+            {sections.map((section) => <option key={section.id} value={section.id}>{section.title}</option>)}
+          </SelectField>
+        </div>
+      ) : !card.id && <input type="hidden" name="sectionId" value={selectedSectionId || card.section_id || sections[0]?.id || ''} />}
       <TicketFields
         title={card.title || ''}
         description={description}
@@ -256,17 +270,29 @@ function TicketForm({
   );
 }
 
-export function CreateTicketDialog({ sections, apps, members, canAssignWorkspaceMembers, canManageTicketFields, boardAppId, disabled }) {
+export function CreateTicketDialog({ sections = [], boards, apps, members, canAssignWorkspaceMembers, canManageTicketFields, boardAppId, disabled }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
-  const initialSection = sections[0]?.id || '';
+  const boardOptions = Array.isArray(boards) ? boards : null;
+  const initialBoard = boardOptions?.[0];
+  const [selectedBoardId, setSelectedBoardId] = useState(initialBoard?.id || '');
+  const [selectedSectionId, setSelectedSectionId] = useState(initialBoard?.sections?.[0]?.id || sections[0]?.id || '');
+  const selectedBoard = boardOptions?.find((board) => board.id === selectedBoardId);
+  const activeSections = selectedBoard?.sections || sections;
+  const initialSection = activeSections[0]?.id || '';
+
+  function changeBoard(boardId) {
+    const nextBoard = boardOptions?.find((board) => board.id === boardId);
+    setSelectedBoardId(boardId);
+    setSelectedSectionId(nextBoard?.sections?.[0]?.id || '');
+  }
 
   async function submit(event) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const sectionId = String(formData.get('sectionId') || initialSection);
+    const sectionId = String(formData.get('sectionId') || selectedSectionId || initialSection);
     setPending(true);
     setError('');
     try {
@@ -287,19 +313,24 @@ export function CreateTicketDialog({ sections, apps, members, canAssignWorkspace
 
   return (
     <>
-      <button type="button" onClick={() => { setError(''); setOpen(true); }} disabled={disabled || !sections.length} className="btn btn-primary">
+      <button type="button" onClick={() => { setError(''); setOpen(true); }} disabled={disabled || !(boardOptions ? boardOptions.some((board) => board.sections.length) : sections.length)} className="btn btn-primary">
         Create Ticket
       </button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Create Ticket" description="Add ticket details and manage its status on the board.">
+      <Modal open={open} onClose={() => setOpen(false)} title="Create Ticket" description="Choose a board and list, then add the ticket details.">
         <TicketForm
           key={open ? 'new-ticket' : 'closed'}
-          card={{ title: '', description: '', priority: 'medium', due_date: null, app_id: '', section_id: initialSection, assignees: [] }}
+          card={{ title: '', description: '', priority: 'medium', due_date: null, app_id: '', section_id: selectedSectionId || initialSection, assignees: [] }}
           apps={apps}
           members={members}
           canAssignWorkspaceMembers={canAssignWorkspaceMembers}
           canManageTicketFields={canManageTicketFields}
-          boardAppId={boardAppId}
-          sections={sections}
+          boardAppId={selectedBoard?.app_id || boardAppId}
+          sections={activeSections}
+          boardOptions={boardOptions}
+          selectedBoardId={selectedBoardId}
+          onBoardChange={changeBoard}
+          selectedSectionId={selectedSectionId || initialSection}
+          onSectionChange={setSelectedSectionId}
           pending={pending}
           onSubmit={submit}
           onCancel={() => setOpen(false)}

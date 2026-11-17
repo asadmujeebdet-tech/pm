@@ -685,6 +685,47 @@ export async function getMemberTicketStats() {
 
 // Stage-only home view: every visible card grouped by stage (list) title across boards,
 // with the time it has spent in each stage.
+export async function getTicketCreationBoards(profile) {
+  const [boards, sections] = await Promise.all([
+    queryDb(
+      `
+        SELECT b.id, b.name, b.app_id
+        FROM public.boards b
+        WHERE $2 = 'admin'
+          OR b.created_by = $1
+          OR EXISTS (SELECT 1 FROM public.board_members bm WHERE bm.board_id = b.id AND bm.profile_id = $1)
+          OR EXISTS (SELECT 1 FROM public.app_members am WHERE am.app_id = b.app_id AND am.profile_id = $1)
+        ORDER BY b.name, b.created_at
+      `,
+      [profile.id, profile.role]
+    ),
+    queryDb(
+      `
+        SELECT s.id, s.board_id, s.title
+        FROM public.board_sections s
+        JOIN public.boards b ON b.id = s.board_id
+        WHERE $2 = 'admin'
+          OR b.created_by = $1
+          OR EXISTS (SELECT 1 FROM public.board_members bm WHERE bm.board_id = b.id AND bm.profile_id = $1)
+          OR EXISTS (SELECT 1 FROM public.app_members am WHERE am.app_id = b.app_id AND am.profile_id = $1)
+        ORDER BY s.position, s.created_at
+      `,
+      [profile.id, profile.role]
+    ),
+  ]);
+
+  const sectionsByBoard = new Map();
+  for (const section of sections) {
+    const boardSections = sectionsByBoard.get(section.board_id) || [];
+    boardSections.push(section);
+    sectionsByBoard.set(section.board_id, boardSections);
+  }
+
+  return boards
+    .map((board) => ({ ...board, sections: sectionsByBoard.get(board.id) || [] }))
+    .filter((board) => board.sections.length > 0);
+}
+
 export async function getStageBoard(profile) {
   const visibleBoards = `
     ($2 = 'admin'
