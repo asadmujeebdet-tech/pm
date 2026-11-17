@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { Columns3 } from 'lucide-react';
 import StageBoard from '@/components/boards/StageBoard';
 import { CreateTicketDialog } from '@/components/boards/TicketDialog';
-import { ActionButton, EmptyState, PageHeader } from '@/components/ui/primitives';
+import { EmptyState, PageHeader } from '@/components/ui/primitives';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import { requireActiveProfile } from '@/lib/auth';
 import { getApps, getMembers, getStageBoard, getTicketCreationBoards, hasDatabaseConnection } from '@/lib/db';
@@ -26,15 +26,14 @@ async function OverviewContent() {
       <PageHeader
         eyebrow="Your workspace"
         title="Project stages"
-        description="A live view of work across your boards. Find a ticket, follow its progress, or move it to the next stage."
+        description="A live view of work across your projects. Find a ticket, follow its progress, or move it to the next stage."
         actions={connected && <CreateTicketDialog boards={boards} apps={apps} members={members} canAssignWorkspaceMembers={profile.role === 'admin'} canManageTicketFields={profile.role === 'admin'} />}
       />
       {data.stages.length === 0 ? (
         <EmptyState
           icon={Columns3}
-          title="No stages yet"
-          description="Create a board and its stages (Planning, Development, QA…) will appear here."
-          action={<ActionButton href="/boards">Open boards</ActionButton>}
+          title="No project stages yet"
+          description="Project stages will appear here once they are set up by an administrator."
         />
       ) : (
         <StageBoard stages={data.stages} cards={data.cards} sectionMap={data.sectionMap} isAdmin={profile.role === 'admin'} />

@@ -17,14 +17,14 @@ async function AppDetailsPanels({ app, profile }) {
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.75fr)]">
       <div className="space-y-6">
-        <Panel title="Related tickets" subtitle={`${ticketCount} tickets across accessible boards`} tone="blue">
+        <Panel title="Related tickets" subtitle={`${ticketCount} tickets across accessible projects`} tone="blue">
           {tickets.length === 0 ? (
             <EmptyState compact icon={ListChecks} title="No tickets yet" description="Tickets linked to this app will appear here." />
           ) : (
             <ul className="divide-y divide-[var(--border)]">
               {tickets.map((ticket) => (
                 <li key={ticket.id} className="py-3 first:pt-0 last:pb-0">
-                  <Link href={`/boards/${ticket.board_id}?ticketId=${ticket.id}`} className="surface-tint-blue flex min-w-0 items-center gap-3 rounded-xl border p-3">
+                  <Link href={`/tickets/${ticket.board_id}?ticketId=${ticket.id}`} className="surface-tint-blue flex min-w-0 items-center gap-3 rounded-xl border p-3">
                     <span className="shrink-0 font-mono text-xs font-bold text-[var(--primary)]">#{String(ticket.ticket_number).padStart(3, '0')}</span>
                     <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--foreground)] hover:text-[var(--primary)]">{ticket.title}</span>
                     <span className="hidden shrink-0 text-xs text-[var(--muted)] sm:inline">{ticket.section_name}</span>
@@ -46,7 +46,7 @@ async function AppDetailsPanels({ app, profile }) {
                 <li key={`comment-${item.id}`} className="surface-tint-purple rounded-xl border p-3">
                   <p className="text-sm text-[var(--foreground)]">
                     <span className="font-medium">{item.author_name}</span> commented on{' '}
-                    <Link className="font-medium text-[var(--primary)] hover:underline" href={`/boards/${item.board_id}?ticketId=${item.card_id}`}>
+                    <Link className="font-medium text-[var(--primary)] hover:underline" href={`/tickets/${item.board_id}?ticketId=${item.card_id}`}>
                       #{String(item.ticket_number).padStart(3, '0')} {item.ticket_title}
                     </Link>
                   </p>

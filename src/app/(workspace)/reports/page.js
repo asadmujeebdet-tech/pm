@@ -34,12 +34,12 @@ async function ReportsContent() {
     <>
       <PageHeader
         title="Reports"
-        description="Delivery status, workload and risk across every board. Lists named Completed, Done, Closed or Released count as finished."
+        description="Delivery status, workload and risk across every project. Stages named Completed, Done, Closed or Released count as finished."
         actions={<a href="/api/reports/export" className="btn btn-secondary">Export CSV</a>}
       />
 
       {cards.length === 0 ? (
-        <EmptyState title="Nothing to report yet" description="Create a board and add tasks. Delivery, workload and risk figures will appear here." />
+        <EmptyState title="Nothing to report yet" description="Project stages and tickets will appear here once your workspace is set up." />
       ) : (
         <div className="space-y-6">
           <section aria-label="Key numbers" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -50,7 +50,7 @@ async function ReportsContent() {
           </section>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <Panel title="Pipeline" subtitle="Tasks per list, across all boards" tone="blue">
+            <Panel title="Pipeline" subtitle="Tickets per stage, across projects" tone="blue">
               <ul className="space-y-3">
                 {r.pipeline.map((p) => (
                   <li key={p.name} className="grid grid-cols-[7rem_1fr_2rem] items-center gap-4 text-sm">
@@ -82,12 +82,12 @@ async function ReportsContent() {
             </Panel>
           </div>
 
-          <Panel title="Board progress" subtitle="Completion and risk per board" tone="green" className="overflow-hidden !p-0">
+          <Panel title="Project progress" subtitle="Completion and risk per project" tone="green" className="overflow-hidden !p-0">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-sm">
                 <thead>
                   <tr className="border-y border-[var(--border)] bg-[var(--neutral)] text-left text-xs text-[var(--muted)]">
-                    <th className="px-5 py-2.5 font-medium">Board</th>
+                    <th className="px-5 py-2.5 font-medium">Project</th>
                     <th className="px-3 py-2.5 font-medium">Progress</th>
                     <th className="px-3 py-2.5 text-right font-medium">Tasks</th>
                     <th className="px-3 py-2.5 text-right font-medium">Done</th>
@@ -99,7 +99,7 @@ async function ReportsContent() {
                   {r.boards.map((b) => (
                     <tr key={b.id} className="hover:bg-[var(--neutral)]">
                       <td className="px-5 py-3">
-                        <Link href={`/boards/${b.id}`} className="font-medium hover:text-[var(--primary)]">{b.name}</Link>
+                        <Link href={`/tickets/${b.id}`} className="font-medium hover:text-[var(--primary)]">{b.name}</Link>
                         {b.app_name && <p className="text-xs text-[var(--muted)]">{b.app_name}</p>}
                       </td>
                       <td className="px-3 py-3">
@@ -151,7 +151,7 @@ async function ReportsContent() {
                   {r.attention.map((t) => (
                     <li key={t.id} className="surface-tint-red flex items-start justify-between gap-4 rounded-lg border p-3">
                       <div className="min-w-0">
-                        <Link href={`/boards/${t.board_id}?ticketId=${t.id}`} className="block truncate text-sm font-medium hover:text-[var(--primary)]">
+                        <Link href={`/tickets/${t.board_id}?ticketId=${t.id}`} className="block truncate text-sm font-medium hover:text-[var(--primary)]">
                           <span className="mr-1.5 font-mono text-[11px] text-[var(--muted)]">#{String(t.ticket_number || 0).padStart(3, '0')}</span>
                           {t.title}
                         </Link>

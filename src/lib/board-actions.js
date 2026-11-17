@@ -155,6 +155,24 @@ function safeOriginalFilename(value) {
     .slice(0, 255) || 'attachment';
 }
 
+function normalizeCardLink(titleValue, urlValue) {
+  const title = String(titleValue || '').trim();
+  const inputUrl = String(urlValue || '').trim();
+  if (!title || title.length > 120 || !inputUrl || inputUrl.length > 2048) {
+    return { error: 'Enter a link title (up to 120 characters) and a valid URL.' };
+  }
+
+  try {
+    const parsedUrl = new URL(inputUrl);
+    if (!['http:', 'https:'].includes(parsedUrl.protocol) || parsedUrl.username || parsedUrl.password) {
+      throw new Error('Unsupported URL.');
+    }
+    return { title, url: parsedUrl.toString() };
+  } catch {
+    return { error: 'Enter a valid http or https URL.' };
+  }
+}
+
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -251,8 +269,7 @@ function formatStageDuration(ms) {
 }
 
 function revalidateBoard(boardId) {
-  revalidatePath('/boards');
-  revalidatePath(`/boards/${boardId}`);
+  revalidatePath(`/tickets/${boardId}`);
   revalidatePath('/my-tasks');
   revalidatePath('/overview');
 }
@@ -303,7 +320,6 @@ export async function createBoard(previousState, formData) {
 
   const boardId = boards[0]?.id;
   if (!boardId) throw new Error('The database did not return the created board.');
-  revalidatePath('/boards');
   revalidatePath('/overview');
   return { success: true, message: 'Board created.', boardId };
 }
@@ -608,6 +624,21 @@ export async function createCard(sectionId, formData) {
     return { success: false, message: 'Choose the user assigned to this app, or an active member of this board.' };
   }
 
+  const attachmentFile = formData.get('file');
+  let validatedAttachment = null;
+  if (attachmentFile && typeof attachmentFile.arrayBuffer === 'function' && attachmentFile.name) {
+    try {
+      validatedAttachment = await readTicketAttachment(attachmentFile);
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  }
+
+  const linkTitle = String(formData.get('linkTitle') || '').trim();
+  const linkUrl = String(formData.get('linkUrl') || '').trim();
+  const ticketLink = linkTitle || linkUrl ? normalizeCardLink(linkTitle, linkUrl) : null;
+  if (ticketLink?.error) return { success: false, message: ticketLink.error };
+
   const appRows = appId ? await queryDb('SELECT name FROM public.apps WHERE id = $1 LIMIT 1', [appId]) : [];
   const appLabel = appRows[0]?.name || 'General board';
   const card = await withDbTransaction(async (client) => {
@@ -653,6 +684,31 @@ export async function createCard(sectionId, formData) {
       `,
       [createdCard.id, sectionId, profile.id]
     );
+    if (validatedAttachment) {
+      await client.query(
+        `
+          INSERT INTO public.card_attachments
+            (card_id, filename, storage_path, mime_type, file_size, attachment_type, created_by, storage_data)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        `,
+        [
+          createdCard.id,
+          safeOriginalFilename(attachmentFile.name),
+          createStoragePath(createdCard.id, attachmentFile),
+          validatedAttachment.contentType,
+          attachmentFile.size,
+          validatedAttachment.attachmentType,
+          profile.id,
+          validatedAttachment.bytes,
+        ]
+      );
+    }
+    if (ticketLink) {
+      await client.query(
+        `INSERT INTO public.card_links (card_id, title, url, created_by) VALUES ($1, $2, $3, $4)`,
+        [createdCard.id, ticketLink.title, ticketLink.url, profile.id]
+      );
+    }
     if (assigneeIds.length > 0) {
       await client.query(
         `
@@ -1210,22 +1266,8 @@ export async function addCardLink(cardId, title, urlValue) {
   const card = await requireEditableCard(cardId, profile);
   if (!card) return { success: false, message: 'You do not have permission to edit this ticket.' };
 
-  const cleanTitle = String(title || '').trim();
-  const inputUrl = String(urlValue || '').trim();
-  if (!cleanTitle || cleanTitle.length > 120 || inputUrl.length > 2048) {
-    return { success: false, message: 'Enter a link title (up to 120 characters) and a valid URL.' };
-  }
-
-  let url;
-  try {
-    const parsedUrl = new URL(inputUrl);
-    if (!['http:', 'https:'].includes(parsedUrl.protocol) || parsedUrl.username || parsedUrl.password) {
-      throw new Error('Unsupported URL.');
-    }
-    url = parsedUrl.toString();
-  } catch {
-    return { success: false, message: 'Enter a valid http or https URL.' };
-  }
+  const link = normalizeCardLink(title, urlValue);
+  if (link.error) return { success: false, message: link.error };
 
   const links = await queryDb(
     `
@@ -1234,7 +1276,7 @@ export async function addCardLink(cardId, title, urlValue) {
       ON CONFLICT (card_id, url) DO NOTHING
       RETURNING id, title, url, created_at
     `,
-    [cardId, cleanTitle, url, profile.id]
+    [cardId, link.title, link.url, profile.id]
   );
   if (!links[0]) return { success: false, message: 'This URL is already attached to the ticket.' };
 
@@ -1346,8 +1388,7 @@ export async function updateBoard(boardId, formData) {
   );
   if (!rows[0]) return { success: false, message: 'Board not found.' };
 
-  revalidatePath('/boards');
-  revalidatePath(`/boards/${boardId}`);
+  revalidatePath(`/tickets/${boardId}`);
   revalidatePath('/overview');
   revalidatePath('/reports');
   return { success: true, message: 'Board updated.' };
@@ -1361,7 +1402,7 @@ export async function deleteBoard(boardId) {
   const rows = await queryDb('DELETE FROM public.boards WHERE id = $1 RETURNING id', [boardId]);
   if (!rows[0]) return { success: false, message: 'Board not found.' };
 
-  revalidatePath('/boards');
+  revalidatePath(`/tickets/${boardId}`);
   revalidatePath('/overview');
   revalidatePath('/my-tasks');
   revalidatePath('/reports');

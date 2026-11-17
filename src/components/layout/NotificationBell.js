@@ -90,7 +90,7 @@ export default function NotificationBell() {
       }
     }
     setOpen(false);
-    router.push(`/boards/${notification.board_id}?ticketId=${notification.card_id}`);
+    router.push(`/tickets/${notification.board_id}?ticketId=${notification.card_id}`);
   }
 
   return (

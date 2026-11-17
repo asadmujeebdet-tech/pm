@@ -497,16 +497,16 @@ export default function BoardWorkspace({ initialBoard, initialCardId }) {
   function closeTicket() {
     setSelectedCardId(null);
     setDismissedInitialCardId(initialCardId);
-    if (initialCardId) router.replace(`/boards/${board.id}`, { scroll: false });
+    if (initialCardId) router.replace(`/tickets/${board.id}`, { scroll: false });
   }
 
   return (
     <div className="flex h-[calc(100dvh-6rem)] min-h-[28rem] flex-col gap-4 sm:h-[calc(100dvh-7rem)]">
       <div className="flex shrink-0 flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div className="min-w-0">
-          <Link href="/boards" className="mb-3 inline-flex items-center gap-1.5 text-xs font-medium text-[var(--muted)] hover:text-[var(--foreground)]">
+          <Link href="/overview" className="mb-3 inline-flex items-center gap-1.5 text-xs font-medium text-[var(--muted)] hover:text-[var(--foreground)]">
             <ArrowLeft size={14} aria-hidden="true" />
-            All boards
+            Workspace overview
           </Link>
           <div className="flex items-center gap-3">
             <div className="min-w-0">
@@ -553,7 +553,7 @@ export default function BoardWorkspace({ initialBoard, initialCardId }) {
         }}
         onDragEnd={handleDragEnd}
       >
-        <div className="board-scroll" aria-label="Board lists">
+        <div className="board-scroll" aria-label="Project stages">
           <div className="board-columns" style={{ '--board-column-count': Math.max(1, board.sections.length + (board.can_edit ? 1 : 0)) }}>
             {board.sections.map((section, index) => (
               <BoardColumn
@@ -568,7 +568,7 @@ export default function BoardWorkspace({ initialBoard, initialCardId }) {
                 onOpenCard={(card) => {
                   setSelectedCardId(card.id);
                   setDismissedInitialCardId(initialCardId);
-                  if (initialCardId) router.replace(`/boards/${board.id}`, { scroll: false });
+                  if (initialCardId) router.replace(`/tickets/${board.id}`, { scroll: false });
                 }}
                 onRename={handleRename}
                 onDelete={handleDeleteSection}

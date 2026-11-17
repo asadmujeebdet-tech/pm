@@ -20,7 +20,7 @@ async function MyTasksContent() {
       <PageHeader
         eyebrow="Personal"
         title="My Tasks"
-        description="A focused list of cards assigned to you across your workspace boards."
+        description="A focused list of tickets assigned to you across your projects."
       />
 
       {!hasDatabaseConnection() ? (
@@ -31,8 +31,8 @@ async function MyTasksContent() {
         <EmptyState
           icon={ListChecks}
           title="No tasks assigned"
-          description="When a teammate assigns a card to you, it will appear here with its board, list, and due date."
-          action={<Link href="/boards" className="btn btn-secondary">Browse boards</Link>}
+          description="When a teammate assigns a ticket to you, its details and due date will appear here."
+          action={<Link href="/overview" className="btn btn-secondary">Go to overview</Link>}
         />
       ) : (
         <ul className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
@@ -63,7 +63,7 @@ async function MyTasksContent() {
                   )}
                 </div>
                 <div className="mt-auto flex justify-end pt-4">
-                  <Link href={`/boards/${task.board_id}?ticketId=${task.id}`} className="btn btn-secondary">
+                  <Link href={`/tickets/${task.board_id}?ticketId=${task.id}`} className="btn btn-secondary">
                     See more details
                     <ArrowUpRight size={16} aria-hidden="true" />
                   </Link>

@@ -26,7 +26,6 @@ const navigation = [
     { href: '/reports', label: 'Reports', icon: BarChart3 },
   ] },
   { group: 'Work', items: [
-    { href: '/boards', label: 'Boards', icon: KanbanSquare },
     { href: '/my-tasks', label: 'My Tasks', icon: ListChecks },
   ] },
   { group: 'Portfolio', items: [
@@ -144,7 +143,7 @@ export default function AppShell({ children, user, fullWidth = false }) {
     .map((g) => ({ ...g, items: g.items.filter((i) => !i.adminOnly || user?.role === 'admin') }))
     .filter((g) => g.items.length > 0);
   const activeItem = groups.flatMap((g) => g.items).find((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
-  const contentFullWidth = fullWidth || /^\/boards\/[^/]+/.test(pathname);
+  const contentFullWidth = fullWidth || /^\/tickets\/[^/]+/.test(pathname);
 
   // Drawer behaviour: Escape closes, page behind does not scroll, focus moves in and back out.
   useEffect(() => {

@@ -188,11 +188,6 @@ function TicketForm({
   canManageTicketFields,
   boardAppId,
   sections = [],
-  boardOptions,
-  selectedBoardId,
-  onBoardChange,
-  selectedSectionId,
-  onSectionChange,
   pending,
   onSubmit,
   onCancel,
@@ -229,16 +224,7 @@ function TicketForm({
 
   return (
     <form id={formId} onSubmit={onSubmit} className="space-y-4">
-      {!card.id && boardOptions?.length ? (
-        <div className="grid gap-4 sm:grid-cols-2">
-          <SelectField label="Board" value={selectedBoardId} onChange={(event) => onBoardChange(event.target.value)} disabled={pending} required>
-            {boardOptions.map((board) => <option key={board.id} value={board.id}>{board.name}</option>)}
-          </SelectField>
-          <SelectField label="List" name="sectionId" value={selectedSectionId} onChange={(event) => onSectionChange(event.target.value)} disabled={pending} required>
-            {sections.map((section) => <option key={section.id} value={section.id}>{section.title}</option>)}
-          </SelectField>
-        </div>
-      ) : !card.id && <input type="hidden" name="sectionId" value={selectedSectionId || card.section_id || sections[0]?.id || ''} />}
+      {!card.id && <input type="hidden" name="sectionId" value={card.section_id || sections[0]?.id || ''} />}
       <TicketFields
         title={card.title || ''}
         description={description}
@@ -257,6 +243,26 @@ function TicketForm({
         onDescriptionChange={setDescription}
         onAppChange={selectApp}
       />
+      {!card.id && (
+        <fieldset disabled={pending} className="space-y-3 rounded-xl border border-[var(--border)] p-4">
+          <legend className="px-1 text-sm font-semibold text-[var(--foreground)]">Files and links</legend>
+          <div>
+            <label htmlFor="create-ticket-file" className="mb-1.5 block text-sm font-medium text-[var(--foreground)]">Attach a file</label>
+            <input
+              id="create-ticket-file"
+              name="file"
+              type="file"
+              className="field min-h-11 file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--primary-soft)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[var(--primary)]"
+            />
+            <p className="mt-1.5 text-xs text-[var(--muted)]">Images up to 10 MB; other files up to 50 MB.</p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <TextField label="Link title" name="linkTitle" maxLength={120} placeholder="Design file" />
+            <TextField label="URL" name="linkUrl" type="url" maxLength={2048} placeholder="https://…" />
+          </div>
+          <p className="text-xs text-[var(--muted)]">Add both a title and URL to attach a link.</p>
+        </fieldset>
+      )}
       {error && <FormMessage state={{ success: false, message: error }} />}
       {showActions && (
         <div className="flex flex-col-reverse justify-end gap-2 border-t border-[var(--border)] pt-4 sm:flex-row">
@@ -276,23 +282,14 @@ export function CreateTicketDialog({ sections = [], boards, apps, members, canAs
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
   const boardOptions = Array.isArray(boards) ? boards : null;
-  const initialBoard = boardOptions?.[0];
-  const [selectedBoardId, setSelectedBoardId] = useState(initialBoard?.id || '');
-  const [selectedSectionId, setSelectedSectionId] = useState(initialBoard?.sections?.[0]?.id || sections[0]?.id || '');
-  const selectedBoard = boardOptions?.find((board) => board.id === selectedBoardId);
-  const activeSections = selectedBoard?.sections || sections;
+  const defaultBoard = boardOptions?.[0];
+  const activeSections = defaultBoard?.sections || sections;
   const initialSection = activeSections[0]?.id || '';
-
-  function changeBoard(boardId) {
-    const nextBoard = boardOptions?.find((board) => board.id === boardId);
-    setSelectedBoardId(boardId);
-    setSelectedSectionId(nextBoard?.sections?.[0]?.id || '');
-  }
 
   async function submit(event) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const sectionId = String(formData.get('sectionId') || selectedSectionId || initialSection);
+    const sectionId = String(formData.get('sectionId') || initialSection);
     setPending(true);
     setError('');
     try {
@@ -316,21 +313,16 @@ export function CreateTicketDialog({ sections = [], boards, apps, members, canAs
       <button type="button" onClick={() => { setError(''); setOpen(true); }} disabled={disabled || !(boardOptions ? boardOptions.some((board) => board.sections.length) : sections.length)} className="btn btn-primary">
         Create Ticket
       </button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Create Ticket" description="Choose a board and list, then add the ticket details.">
+      <Modal open={open} onClose={() => setOpen(false)} title="Create Ticket" description="Add the ticket details, then attach a file or link if needed.">
         <TicketForm
           key={open ? 'new-ticket' : 'closed'}
-          card={{ title: '', description: '', priority: 'medium', due_date: null, app_id: '', section_id: selectedSectionId || initialSection, assignees: [] }}
+          card={{ title: '', description: '', priority: 'medium', due_date: null, app_id: '', section_id: initialSection, assignees: [] }}
           apps={apps}
           members={members}
           canAssignWorkspaceMembers={canAssignWorkspaceMembers}
           canManageTicketFields={canManageTicketFields}
-          boardAppId={selectedBoard?.app_id || boardAppId}
+          boardAppId={defaultBoard?.app_id || boardAppId}
           sections={activeSections}
-          boardOptions={boardOptions}
-          selectedBoardId={selectedBoardId}
-          onBoardChange={changeBoard}
-          selectedSectionId={selectedSectionId || initialSection}
-          onSectionChange={setSelectedSectionId}
           pending={pending}
           onSubmit={submit}
           onCancel={() => setOpen(false)}

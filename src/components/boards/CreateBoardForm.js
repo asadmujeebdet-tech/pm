@@ -15,7 +15,7 @@ function BoardForm({ apps = [], onClose }) {
     const result = await createBoard(previousState, formData);
     if (result?.success && result.boardId) {
       onClose();
-      router.push(`/boards/${result.boardId}`);
+      router.push(`/tickets/${result.boardId}`);
     }
     return result;
   }, initialState);

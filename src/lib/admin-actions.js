@@ -39,7 +39,6 @@ function getOptionalFile(formData, name) {
 
 function revalidateMembers() {
   revalidatePath('/members');
-  revalidatePath('/boards');
   revalidatePath('/my-tasks');
   revalidatePath('/overview');
   revalidatePath('/apps');
@@ -47,7 +46,6 @@ function revalidateMembers() {
 
 function revalidateApps() {
   revalidatePath('/apps');
-  revalidatePath('/boards');
   revalidatePath('/overview');
   revalidatePath('/members');
   revalidatePath('/my-tasks');

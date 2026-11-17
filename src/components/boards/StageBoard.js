@@ -49,7 +49,7 @@ function StageCard({ card, now, busy }) {
       <div className="flex items-start gap-2">
         <GripVertical size={14} aria-hidden="true" className="mt-0.5 shrink-0 cursor-grab text-[var(--muted)]" />
         <div className="min-w-0 flex-1">
-          <Link href={`/boards/${card.board_id}?ticketId=${card.id}`} className="block text-sm font-medium text-[var(--foreground)] hover:text-[var(--primary)]">
+          <Link href={`/tickets/${card.board_id}?ticketId=${card.id}`} className="block text-sm font-medium text-[var(--foreground)] hover:text-[var(--primary)]">
             <span className="mr-1.5 font-mono text-[10px] font-bold text-[var(--primary)]">#{String(card.ticket_number).padStart(3, '0')}</span>
             {card.title}
           </Link>
@@ -134,7 +134,7 @@ export default function StageBoard({ stages, cards: initialCards, sectionMap, is
     if (busy || card.stage_key === targetKey) return;
     const sectionId = sectionMap[card.board_id]?.[targetKey];
     if (!sectionId) {
-      setMessage('This ticket’s board does not have that stage.');
+      setMessage('This ticket’s project does not have that stage.');
       return;
     }
     const previous = cards;
@@ -197,7 +197,7 @@ export default function StageBoard({ stages, cards: initialCards, sectionMap, is
   }
 
   async function handleDeleteStage(stage) {
-    if (!window.confirm(`Delete "${stage.title}" across all boards? This permanently deletes its tickets and their comments, links, and attachments.`)) return;
+    if (!window.confirm(`Delete "${stage.title}" across all projects? This permanently deletes its tickets and their comments, links, and attachments.`)) return;
 
     setBusy(true);
     setMessage('');
@@ -256,7 +256,7 @@ export default function StageBoard({ stages, cards: initialCards, sectionMap, is
             id="stage-ticket-search"
             type="search"
             className="field field-with-icon min-h-10 rounded-xl border-transparent bg-[var(--bg)] text-sm"
-            placeholder="Search tickets, apps, or boards"
+            placeholder="Search tickets, apps, or projects"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
@@ -356,7 +356,7 @@ export default function StageBoard({ stages, cards: initialCards, sectionMap, is
                           disabled={busy}
                           className="btn btn-ghost btn-icon stage-action-edit min-h-8 min-w-8"
                           aria-label={`Rename ${stage.title} stage`}
-                          title="Rename stage across boards"
+                          title="Rename stage across projects"
                         >
                           <Pencil size={14} aria-hidden="true" />
                         </button>
@@ -366,7 +366,7 @@ export default function StageBoard({ stages, cards: initialCards, sectionMap, is
                           disabled={busy}
                           className="btn btn-ghost btn-icon stage-action-delete min-h-8 min-w-8"
                           aria-label={`Delete ${stage.title} stage`}
-                          title="Delete stage across boards"
+                          title="Delete stage across projects"
                         >
                           <Trash2 size={14} aria-hidden="true" />
                         </button>
