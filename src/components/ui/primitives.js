@@ -4,7 +4,7 @@ import { getInitials } from '@/lib/format';
 
 export function PageHeader({ title, description, actions, eyebrow }) {
   return (
-    <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="page-heading mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
         {eyebrow && (
           <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted)]">{eyebrow}</p>

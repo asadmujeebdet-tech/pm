@@ -306,7 +306,7 @@ export default function StageBoard({ stages, cards: initialCards, sectionMap, is
                 if (card) void handleMove(card, stage.key);
               }}
               className={`stage-column flex w-72 shrink-0 flex-col rounded-2xl border bg-[var(--neutral)] p-3 transition-colors ${dragOver === stage.key ? 'border-[var(--primary)] bg-[var(--primary-soft)]' : 'border-[var(--border)]'}`}
-              style={{ '--i': index }}
+              style={{ '--i': index, '--stage-accent': tone }}
             >
               <header className="mb-3 flex items-center justify-between gap-2 px-1">
                 {editingStage === stage.key ? (
