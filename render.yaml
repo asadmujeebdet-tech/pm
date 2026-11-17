@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: pm-management
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /login
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_APP_URL
+        sync: false
