@@ -29,9 +29,10 @@ import {
   GripVertical,
   MessageSquare,
   Plus,
+  Trash2,
   X,
 } from 'lucide-react';
-import { createSection, moveCard, renameSection } from '@/lib/board-actions';
+import { createSection, deleteSection, moveCard, renameSection } from '@/lib/board-actions';
 import { formatDate, stripHtmlText } from '@/lib/format';
 import { Avatar } from '@/components/ui/primitives';
 import AppIcon from '@/components/ui/AppIcon';
@@ -173,9 +174,11 @@ function BoardColumn({
   toneIndex,
   cards,
   canEdit,
+  canDelete,
   canViewTicketFields,
   onOpenCard,
   onRename,
+  onDelete,
   isSaving,
   isDropTarget,
 }) {
@@ -208,6 +211,24 @@ function BoardColumn({
     } catch (error) {
       console.error('Failed to rename a board list:', error);
       setMessage('Could not rename this list. Check the connection and try again.');
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function removeSection() {
+    const cardLabel = cards.length === 1 ? '1 card' : `${cards.length} cards`;
+    if (!window.confirm(`Delete "${section.title}" and its ${cardLabel}? This also permanently deletes their comments, links, and attachments.`)) return;
+    setPending(true);
+    setMessage('');
+    try {
+      const result = await onDelete(section.id);
+      if (!result?.success) {
+        setMessage(result?.message || 'Could not delete this list.');
+      }
+    } catch (error) {
+      console.error('Failed to delete a board list:', error);
+      setMessage('Could not delete this list. Check the connection and try again.');
     } finally {
       setPending(false);
     }
@@ -255,6 +276,18 @@ function BoardColumn({
             <span className="rounded-md bg-[var(--surface)] px-2 py-1 text-xs font-medium tabular-nums text-[var(--muted)]">
               {cards.length}
             </span>
+            {canDelete && (
+              <button
+                type="button"
+                onClick={removeSection}
+                disabled={pending || isSaving}
+                className="btn btn-ghost btn-icon min-h-8 min-w-8 text-[var(--danger)]"
+                aria-label={`Delete ${section.title} list`}
+                title="Delete list"
+              >
+                <Trash2 size={15} aria-hidden="true" />
+              </button>
+            )}
           </>
         )}
       </header>
@@ -364,6 +397,17 @@ export default function BoardWorkspace({ initialBoard, initialCardId }) {
     } catch (error) {
       console.error('Failed to rename a board list:', error);
       return { success: false, message: 'Could not rename this list. Check the connection and try again.' };
+    }
+  }
+
+  async function handleDeleteSection(sectionId) {
+    try {
+      const result = await deleteSection(sectionId);
+      if (result.success) router.refresh();
+      return result;
+    } catch (error) {
+      console.error('Failed to delete a board list:', error);
+      return { success: false, message: 'Could not delete this list. Check the connection and try again.' };
     }
   }
 
@@ -518,6 +562,7 @@ export default function BoardWorkspace({ initialBoard, initialCardId }) {
                 toneIndex={index}
                 cards={cardsBySection.get(section.id) || []}
                 canEdit={board.can_edit}
+                canDelete={board.can_delete_sections}
                 canViewTicketFields={board.can_view_ticket_fields}
                 isSaving={isSaving}
                 onOpenCard={(card) => {
@@ -526,6 +571,7 @@ export default function BoardWorkspace({ initialBoard, initialCardId }) {
                   if (initialCardId) router.replace(`/boards/${board.id}`, { scroll: false });
                 }}
                 onRename={handleRename}
+                onDelete={handleDeleteSection}
                 isDropTarget={dragOverSectionId === section.id}
               />
             ))}

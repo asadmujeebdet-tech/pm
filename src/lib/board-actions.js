@@ -350,6 +350,22 @@ export async function renameSection(sectionId, title) {
   return { success: true };
 }
 
+export async function deleteSection(sectionId) {
+  const profile = await requireActiveProfile();
+  if (profile.role !== 'admin') return { success: false, message: 'Only admins can delete board lists.' };
+  if (!isUuid(sectionId)) return { success: false, message: 'Invalid list.' };
+
+  const sections = await queryDb(
+    'DELETE FROM public.board_sections WHERE id = $1 RETURNING board_id',
+    [sectionId]
+  );
+  const section = sections[0];
+  if (!section) return { success: false, message: 'List not found.' };
+
+  revalidateBoard(section.board_id);
+  return { success: true, message: 'List deleted.' };
+}
+
 export async function addBoardMember(boardId, memberId) {
   const profile = await requireActiveProfile();
   if (!isUuid(boardId) || !isUuid(memberId)) {

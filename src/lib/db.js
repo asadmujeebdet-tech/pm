@@ -373,7 +373,8 @@ export async function getBoardData(boardId, profile) {
           )
         ) AS can_manage_members,
         ($2 = 'admin') AS can_assign_workspace_members,
-        ($2 = 'admin') AS can_manage_ticket_fields
+        ($2 = 'admin') AS can_manage_ticket_fields,
+        ($2 = 'admin') AS can_delete_sections
       FROM public.boards b
       LEFT JOIN public.apps a ON a.id = b.app_id
       WHERE b.id = $3
