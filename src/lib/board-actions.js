@@ -677,6 +677,9 @@ export async function createCard(sectionId, formData) {
   if (attachmentFiles.length > 10) {
     return { success: false, message: 'Attach no more than 10 files to one ticket.' };
   }
+  if (attachmentFiles.reduce((total, file) => total + file.size, 0) > 50 * 1024 * 1024) {
+    return { success: false, message: 'The combined attachment size must be 50 MB or less.' };
+  }
   const validatedAttachments = [];
   for (const file of attachmentFiles) {
     try {
