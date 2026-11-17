@@ -415,20 +415,22 @@ export async function createOverviewStage(title) {
     const boards = await client.query('SELECT id FROM public.boards ORDER BY created_at, id FOR UPDATE');
     if (boards.rows.length === 0) return { noBoards: true, boardIds: [] };
 
-    const duplicate = await client.query(
-      'SELECT 1 FROM public.board_sections WHERE lower(btrim(title)) = lower($1) LIMIT 1',
-      [cleanTitle]
-    );
-    if (duplicate.rows.length) return { conflict: true, boardIds: [] };
-
+    const updatedBoardIds = [];
     for (const board of boards.rows) {
+      const existing = await client.query(
+        'SELECT 1 FROM public.board_sections WHERE board_id = $1 AND lower(btrim(title)) = lower($2) LIMIT 1',
+        [board.id, cleanTitle]
+      );
+      if (existing.rows.length) continue;
       await client.query(
         `INSERT INTO public.board_sections (board_id, title, position)
          VALUES ($1, $2, (SELECT COALESCE(MAX(position) + 1, 0) FROM public.board_sections WHERE board_id = $1))`,
         [board.id, cleanTitle]
       );
+      updatedBoardIds.push(board.id);
     }
-    return { boardIds: boards.rows.map((board) => board.id) };
+    if (updatedBoardIds.length === 0) return { conflict: true, boardIds: [] };
+    return { boardIds: updatedBoardIds };
   });
 
   if (result.noBoards) return { success: false, message: 'Create a project board first, then add a workspace stage.' };
