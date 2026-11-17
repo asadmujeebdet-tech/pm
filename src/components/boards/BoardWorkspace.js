@@ -148,7 +148,7 @@ function CardTile({ card, toneIndex, canEdit, canViewTicketFields, onOpen, dragg
     <article
       ref={setNodeRef}
       style={style}
-      className={`group relative rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-[18px] shadow-sm transition hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-soft)] surface-tint-${['blue', 'green', 'amber', 'purple', 'red', 'cyan'][toneIndex % 6]}`}
+      className={`board-ticket group relative rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-soft)] transition hover:border-[var(--border-strong)] surface-tint-${['blue', 'green', 'amber', 'purple', 'red', 'cyan'][toneIndex % 6]}`}
     >
       <CardContent
         card={card}

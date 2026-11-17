@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { connection } from 'next/server';
-import { ShieldCheck, TriangleAlert } from 'lucide-react';
+import { KanbanSquare, ShieldCheck, TriangleAlert } from 'lucide-react';
 import LoginForm from '@/components/forms/LoginForm';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { hasAnyProfiles } from '@/lib/auth';
@@ -83,26 +83,60 @@ function LoginSkeleton() {
 
 export default function LoginPage({ searchParams }) {
   return (
-    <main className="login-page relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[var(--bg)] px-4 py-12">
-      <div aria-hidden="true" className="login-glow pointer-events-none absolute inset-0 z-0" />
-      <div aria-hidden="true" className="login-orbs pointer-events-none absolute inset-0 z-0">
-        <span className="login-orb login-orb-1" />
-        <span className="login-orb login-orb-2" />
-        <span className="login-orb login-orb-3" />
+    <main className="login-page">
+      <div aria-hidden="true" className="login-backdrop" />
+      <div className="login-layout">
+        <section className="login-showcase" aria-label="Project Manager workspace">
+          <div className="login-showcase-grid" aria-hidden="true" />
+          <header className="login-brand">
+            <span aria-hidden="true" className="login-logo"><KanbanSquare size={19} strokeWidth={2.4} /></span>
+            <span>
+              <span className="block text-sm font-semibold tracking-tight text-white">Project Manager</span>
+              <span className="mt-0.5 block text-xs text-white/55">Work, in good company.</span>
+            </span>
+          </header>
+          <div className="login-showcase-copy">
+            <p className="login-kicker"><span aria-hidden="true" /> THE TEAM WORKSPACE</p>
+            <h2>Make room for<br />great work.</h2>
+            <p>Bring every project, conversation, and next step into one clear view.</p>
+          </div>
+          <div className="login-board-preview" aria-hidden="true">
+            <div className="login-board-topline"><span>Product launch</span><span className="login-board-status">● On track</span></div>
+            <div className="login-board-columns">
+              <div className="login-board-column">
+                <span className="login-board-column-title"><i /> Up next <b>2</b></span>
+                <span className="login-board-task"><small>DESIGN</small>Map the first-run flow</span>
+                <span className="login-board-task"><small>CONTENT</small>Review launch messaging</span>
+              </div>
+              <div className="login-board-column">
+                <span className="login-board-column-title"><i /> In progress <b>1</b></span>
+                <span className="login-board-task login-board-task-active"><small>ENGINEERING</small>Build the new workspace</span>
+              </div>
+              <div className="login-board-column login-board-column-last">
+                <span className="login-board-column-title"><i /> Complete <b>1</b></span>
+                <span className="login-board-task"><small>RESEARCH</small>Talk to the people who use it</span>
+              </div>
+            </div>
+            <div className="login-board-footer"><span className="login-avatar-stack"><i>J</i><i>M</i><i>A</i></span><span>Small steps. Big momentum.</span></div>
+          </div>
+          <p className="login-showcase-foot">A calmer way to move work forward.</p>
+        </section>
+
+        <section className="login-panel">
+          <div className="login-panel-inner">
+            <div className="login-mobile-brand">
+              <span aria-hidden="true" className="login-logo"><KanbanSquare size={19} strokeWidth={2.4} /></span>
+              <span className="text-sm font-semibold">Project Manager</span>
+            </div>
+            <div className="login-card-wrap">
+              <Suspense fallback={<LoginSkeleton />}>
+                <LoginContent searchParams={searchParams} />
+              </Suspense>
+            </div>
+            <p className="login-panel-foot"><ShieldCheck size={14} aria-hidden="true" /> Secure access for your team</p>
+          </div>
+        </section>
       </div>
-      <div className="login-brand relative z-10 mb-8 flex items-center gap-3">
-        <span aria-hidden="true" className="login-logo flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primary)] text-sm font-bold tracking-wide text-[var(--primary-foreground)] shadow-[var(--shadow-soft)]">PM</span>
-        <div>
-          <p className="text-lg font-semibold tracking-tight text-[var(--foreground)]">Project Management</p>
-          <p className="text-xs text-[var(--muted)]">Internal team workspace</p>
-        </div>
-      </div>
-      <Suspense fallback={<LoginSkeleton />}>
-        <div className="login-card-wrap relative z-10 flex w-full justify-center">
-          <LoginContent searchParams={searchParams} />
-        </div>
-      </Suspense>
-      <p className="relative z-10 mt-6 text-center text-xs text-[var(--muted)]">Secure access for your company team</p>
     </main>
   );
 }

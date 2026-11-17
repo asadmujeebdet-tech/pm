@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from 'next/font/google';
 import ThemeInitializer from '@/components/layout/ThemeInitializer';
 import './globals.css';
+import './premium.css';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -14,18 +15,18 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: {
-    default: 'App Manager',
-    template: '%s · App Manager',
+    default: 'Project Manager',
+    template: '%s · Project Manager',
   },
-  description: 'Internal app and task management workspace for teams',
+  description: 'A focused workspace for teams to plan projects, organize work, and keep momentum.'
 };
 
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f7f8fa' },
-    { media: '(prefers-color-scheme: dark)', color: '#0b0d12' },
+    { media: '(prefers-color-scheme: light)', color: '#f5f7fb' },
+    { media: '(prefers-color-scheme: dark)', color: '#111521' },
   ],
 };
 
