@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { Columns3 } from 'lucide-react';
 import StageBoard from '@/components/boards/StageBoard';
+import AddStageDialog from '@/components/boards/AddStageDialog';
 import { CreateTicketDialog } from '@/components/boards/TicketDialog';
 import { EmptyState, PageHeader } from '@/components/ui/primitives';
 import { PageSkeleton } from '@/components/ui/Skeleton';
@@ -27,7 +28,12 @@ async function OverviewContent() {
         eyebrow="Your workspace"
         title="Project stages"
         description="A live view of work across your projects. Find a ticket, follow its progress, or move it to the next stage."
-        actions={connected && <CreateTicketDialog boards={boards} apps={apps} members={members} canAssignWorkspaceMembers={profile.role === 'admin'} canManageTicketFields={profile.role === 'admin'} />}
+        actions={connected && (
+          <div className="flex flex-wrap items-center gap-2">
+            {profile.role === 'admin' && <AddStageDialog />}
+            <CreateTicketDialog boards={boards} apps={apps} members={members} canAssignWorkspaceMembers={profile.role === 'admin'} canManageTicketFields={profile.role === 'admin'} />
+          </div>
+        )}
       />
       {data.stages.length === 0 ? (
         <EmptyState
