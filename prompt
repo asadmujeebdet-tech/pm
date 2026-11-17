@@ -1,0 +1,648 @@
+# Build an Internal App & Task Management System
+
+## 1. Project Objective
+
+Build a modern, premium-looking internal company web application for managing mobile apps, tracking app updates and versions, and organizing team tasks.
+
+This is a combination of:
+
+- **App Management:** Maintain company apps and their release/update history.
+- **Task Management:** Manage tasks through customizable Trello-style boards and workflow columns.
+- **User Management:** Create and manage team members, profile pictures, and task assignments.
+
+The application must remain simple, intuitive, and easy to use. Do not turn it into an oversized enterprise project management system.
+
+## 2. Technology Stack
+
+Use the following technologies:
+
+- Next.js (latest stable compatible version)
+- React
+- JavaScript ES6+ and JSX only
+- Tailwind CSS
+- Next.js App Router
+- Supabase PostgreSQL
+- Supabase Authentication
+- Supabase Storage
+- PostgreSQL Row Level Security (RLS)
+- Lucide React icons
+- dnd-kit for drag-and-drop functionality
+- Vercel deployment
+
+Do not use TypeScript, Python, PHP, Django, Flask, or Streamlit.
+
+Do not create a separate Express backend unless absolutely necessary. Use Next.js server-side functionality, API routes, and server actions.
+
+## 3. Application Navigation
+
+Keep the navigation simple:
+
+1. Overview
+2. Apps
+3. Boards
+4. My Tasks
+5. Members
+
+Do not add unnecessary navigation items.
+
+Explicitly exclude:
+- Settings module
+- Notifications module
+- Departments
+- Teams module
+- Reports and analytics modules
+- Time tracking
+- Project timelines
+- Gantt charts
+
+Basic account/profile functionality and necessary authentication controls are allowed, but do not build an unnecessary settings module.
+
+## 4. App Management Module
+
+This is a core module of the application.
+
+The company manages multiple mobile applications. Admins must be able to create, edit, view, and delete app records.
+
+### App information
+
+Each app should support:
+
+- App name
+- App icon/logo
+- Package name
+- Platform (Android, iOS, or both)
+- App description
+- Google Play Store URL
+- Apple App Store URL
+- Current version name
+- Current version code/build number
+- Latest release date
+- App status (Active, Inactive, Discontinued)
+- Assigned responsible users
+- Created date
+
+Allow uploading an app icon using Supabase Storage.
+
+### App details page
+
+Every app must have its own dedicated details page.
+
+Display:
+
+- App icon and name
+- Package name
+- Platform
+- Current version
+- Latest release date
+- App description
+- Assigned team members
+- Recent update history
+
+### App version and update tracking
+
+Allow admins and authorized members to record app updates.
+
+Each update record should include:
+
+- Version name (e.g. 2.4.0)
+- Version code/build number
+- Release date
+- Update title
+- Update description / changelog
+- Update type (New Features, Improvements, Bug Fixes, Maintenance)
+- Release status (Planned, In Development, Testing, Released)
+- Related tasks, if applicable
+- Users responsible for the update
+
+Display updates in reverse chronological order, with the latest release first.
+
+The app's current version should be updated when an authorized user marks a release as Released. Preserve the complete version history.
+
+Users should be able to quickly see:
+- Current app version
+- Previous versions
+- Latest changes
+- Upcoming planned updates
+- Tasks related to an update
+
+Do not build a complicated release management or deployment pipeline. This is a straightforward internal version and update tracking system.
+
+## 5. User Management Module
+
+Admins must have complete CRUD functionality for users.
+
+### User creation
+
+Admin should be able to create/invite multiple users.
+
+Each user profile should include:
+
+- Full name
+- Email address
+- Profile picture / DP
+- Role (Admin or Member)
+- Account status (Active or Inactive)
+- Created date
+
+### Profile pictures
+
+Users should be able to upload and update their own profile pictures.
+
+Store profile images in Supabase Storage.
+
+Display profile pictures throughout the application:
+- Task cards
+- Task details
+- Assignee selectors
+- App responsible users
+- Members page
+- Comments
+
+If a user has not uploaded a picture, display their initials as an avatar.
+
+### Admin permissions
+
+Admin must be able to:
+
+- Create/invite users
+- View all users
+- Edit user details
+- Change user roles
+- Activate/deactivate users
+- Delete or disable accounts safely
+- View tasks assigned to each user
+- Assign users to apps
+- Assign tasks to users
+
+Do not allow members to change their own role or grant themselves administrative privileges.
+
+Use Supabase Auth for authentication. Do not store passwords in the profiles table. Do not enable unrestricted public registration.
+
+## 6. Overview Page
+
+Create a clean landing page that provides a quick overview of the company's work.
+
+Display only useful information:
+
+- Total apps
+- Active apps
+- Total team members
+- Total tasks
+- My pending tasks
+- Recently updated apps
+- Recently created tasks
+- Recently completed tasks
+
+Include a section for recently updated applications showing their icon, name, current version, and last update date.
+
+Keep the overview focused. Do not create analytics-heavy dashboards or complicated charts.
+
+## 7. Boards & Task Management
+
+Build a Trello-inspired task management experience.
+
+### Multiple boards
+
+Users should be able to access multiple boards, such as:
+
+- App Development
+- Marketing
+- QA & Testing
+- Product Updates
+
+These are examples only. Do not hardcode them.
+
+Admins and authorized users should be able to create, rename, and delete boards.
+
+Each board can optionally be associated with one or more company apps.
+
+### Dynamic workflow sections
+
+Every board must have its own customizable workflow columns.
+
+Examples:
+
+- Planning
+- Development
+- QA
+- Marketing
+- Uploaded at Developer Account
+- Completed
+
+These are examples, not fixed departments or predefined modules.
+
+Users with permission must be able to:
+
+- Create columns
+- Rename columns
+- Reorder columns
+- Delete columns
+- Move tasks between columns
+- Reorder tasks inside columns
+
+The workflow must be completely dynamic.
+
+Do not implement a separate hardcoded task status system. A task's current column represents its workflow stage.
+
+If a column containing tasks is deleted, require the user to move those tasks to another column or confirm an appropriate reassignment before deletion.
+
+### Task cards
+
+Every task should support:
+
+- Task title
+- Description
+- Assignee or multiple assignees, if enabled
+- Priority (Low, Medium, High, Urgent)
+- Due date
+- Labels
+- Associated app (optional)
+- Associated app version/update (optional)
+- Attachments
+- Comments
+- Created by
+- Created date
+- Updated date
+
+Users should be able to:
+
+- Create tasks
+- Edit tasks
+- Delete tasks according to permissions
+- Assign tasks
+- Change priorities
+- Add descriptions
+- Add labels
+- Move cards using drag and drop
+- Reorder cards
+- Open a detailed task view
+
+### Task details
+
+Clicking a card should open a clean modal or side drawer.
+
+Include:
+- Task title and description
+- Assignees with profile pictures
+- Priority
+- Due date
+- Associated app and version, if any
+- Current workflow column
+- Comments
+- Attachments
+- Activity information
+
+Avoid unnecessary complexity.
+
+## 8. App-to-Task Relationship
+
+Apps and tasks must be connected.
+
+A task can optionally belong to a particular app.
+
+For example:
+
+App: PDF Reader
+
+Version: 2.4.0
+
+Related tasks:
+- Fix PDF export crash
+- Improve image insertion
+- Add AI summary feature
+- Complete QA testing
+- Prepare Play Store release
+
+When viewing an app, users should be able to see its related tasks and updates.
+
+When viewing a task, users should be able to navigate to its associated app.
+
+This relationship should make it easy to understand which tasks are contributing to each app's development and updates.
+
+## 9. Attachments
+
+Allow users to attach:
+
+- Screenshots
+- Images
+- APK files
+- ZIP files
+- PDF documents
+- Other permitted documents
+- External URLs
+
+Store uploaded files in a private Supabase Storage bucket named `pms-attachments`.
+
+Use paths such as:
+
+`boards/{board_id}/cards/{card_id}/{filename}`
+
+Store attachment metadata in PostgreSQL, not Base64 file content.
+
+Use signed URLs for private file access.
+
+Validate file size, file type, permissions, and filenames. APKs must be treated as ordinary downloadable files; never execute or automatically install them.
+
+## 10. Comments
+
+Users should be able to comment on tasks.
+
+Each comment should contain:
+- Comment text
+- Author
+- Author profile picture
+- Created timestamp
+
+Allow authorized users to edit or delete their own comments. Admins may moderate comments where appropriate.
+
+## 11. My Tasks
+
+Create a simple page showing tasks assigned to the currently authenticated user.
+
+Display:
+- Task title
+- Associated app
+- Board
+- Current workflow column
+- Priority
+- Due date
+
+Allow users to open tasks directly from this page.
+
+## 12. Permissions & Roles
+
+Keep roles limited to:
+
+**Admin**
+- Manage all apps
+- Manage app updates
+- Manage users
+- Create and manage boards
+- Manage workflow sections
+- Create, assign, edit, and delete tasks
+- View all company tasks
+
+**Member**
+- View authorized apps and boards
+- Create and update permitted tasks
+- Move tasks between permitted sections
+- Upload attachments
+- Comment on tasks
+- Update their own profile picture
+- View their assigned tasks
+
+Enforce permissions on the server and through PostgreSQL RLS. Hiding UI controls is not sufficient security.
+
+## 13. Supabase Database
+
+Create a complete standalone SQL file:
+
+`supabase/schema.sql`
+
+It must be ready to copy and execute in:
+
+Supabase Dashboard → SQL Editor → New Query → Run.
+
+Include all necessary:
+
+- Tables
+- UUID primary keys
+- Foreign keys
+- Constraints
+- Indexes
+- TIMESTAMPTZ columns
+- Updated-at triggers
+- Relationships
+- RLS enablement
+- Secure RLS policies
+- Necessary database functions and secure helper functions
+
+### Suggested database tables
+
+1. `profiles`
+2. `apps`
+3. `app_members`
+4. `app_updates`
+5. `boards`
+6. `board_members`
+7. `board_sections`
+8. `cards`
+9. `card_labels`
+10. `card_comments`
+11. `card_attachments`
+
+Add any additional table only when technically necessary.
+
+### Database security requirements
+
+- Link `profiles.id` to `auth.users.id`.
+- Do not store passwords.
+- Prevent unauthorized public registration.
+- Restrict data access to authenticated and authorized users.
+- Prevent users from accessing another board's cards by manipulating IDs.
+- Prevent unauthorized access to app updates and attachments.
+- Prevent privilege escalation.
+- Avoid recursive RLS policy problems.
+- Ensure Admin permissions are checked securely.
+- Use appropriate indexes for frequently queried relationships.
+
+Create an optional `supabase/seed.sql` for sample boards and workflow sections. Never create fake authentication users or hardcode production credentials.
+
+### Supabase Storage
+
+Create/document the following private buckets:
+
+- `pms-attachments` for task files
+- `profile-avatars` for user profile pictures
+- `app-icons` for application icons
+
+Provide the necessary Storage policies and explain any manual Supabase configuration.
+
+## 14. Environment Variables
+
+Create `.env.example` and use `.env.local` for local development.
+
+Use:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_PROJECT_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+
+DATABASE_URL=YOUR_SESSION_POOLED_POSTGRES_CONNECTION_STRING
+
+SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY
+```
+
+Important implementation requirements:
+
+- `NEXT_PUBLIC_SUPABASE_URL` must contain the Supabase Project URL.
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` is the public/publishable client key.
+- `DATABASE_URL` must contain the session-pooled PostgreSQL connection string if direct server-side PostgreSQL access is required.
+- The session-pooled connection string must never be exposed to browser code.
+- `SUPABASE_SERVICE_ROLE_KEY` must only be used in trusted server-side code and must never be exposed through a `NEXT_PUBLIC_` variable.
+- Prefer Supabase Auth and Supabase client libraries for normal application database operations.
+- Do not unnecessarily introduce a second database access method.
+
+Use the environment variables correctly in the Supabase client configuration.
+
+## 15. UI/UX Design
+
+Build a premium, modern SaaS interface inspired by Trello and Linear.
+
+Design principles:
+
+- Clean and uncluttered
+- Modern typography
+- Consistent spacing
+- Professional colors
+- Responsive layout
+- Smooth interactions
+- Clear navigation
+- Attractive cards
+- Compact tables
+- Beautiful profile avatars
+- Useful empty states
+- Loading skeletons
+- Proper success and error feedback
+- Confirmation dialogs for destructive actions
+
+The Boards page should have a Kanban-style layout with horizontally scrollable columns.
+
+The Apps page should show application cards with icons, names, versions, and recent update information.
+
+The Members page should display profile pictures, names, email addresses, roles, and account status.
+
+Do not overdesign the interface. Prioritize usability.
+
+## 16. Project Structure
+
+Use a clean, maintainable structure similar to:
+
+```text
+company-app-manager/
+├── public/
+├── src/
+│   ├── app/
+│   │   ├── login/
+│   │   ├── overview/
+│   │   ├── apps/
+│   │   │   └── [appId]/
+│   │   ├── boards/
+│   │   │   └── [boardId]/
+│   │   ├── my-tasks/
+│   │   ├── members/
+│   │   ├── api/
+│   │   ├── layout.js
+│   │   └── globals.css
+│   ├── components/
+│   │   ├── layout/
+│   │   ├── apps/
+│   │   ├── updates/
+│   │   ├── boards/
+│   │   ├── sections/
+│   │   ├── cards/
+│   │   ├── attachments/
+│   │   ├── comments/
+│   │   ├── members/
+│   │   └── ui/
+│   ├── lib/
+│   │   ├── supabase/
+│   │   ├── auth/
+│   │   ├── permissions/
+│   │   └── utilities/
+│   ├── services/
+│   └── hooks/
+├── supabase/
+│   ├── schema.sql
+│   ├── seed.sql
+│   └── README.md
+├── .env.example
+├── .gitignore
+├── package.json
+└── README.md
+```
+
+Adjust the structure when technically appropriate, but maintain clear separation of concerns.
+
+## 17. Implementation Requirements
+
+Build a real, working application, not a static UI prototype.
+
+Do not use:
+- Dummy data as a substitute for database integration
+- Fake login functionality
+- Hardcoded users
+- Hardcoded workflow columns
+- Mock CRUD operations
+- Placeholder buttons
+- In-memory-only task persistence
+
+All important operations must work with Supabase.
+
+Implement:
+
+1. Authentication and protected routes.
+2. Admin and Member permissions.
+3. User CRUD and profile picture uploads.
+4. App CRUD and icon uploads.
+5. App version and update history.
+6. Board CRUD.
+7. Dynamic workflow columns.
+8. Task CRUD and drag-and-drop.
+9. Task assignments.
+10. App-to-task relationships.
+11. Comments and attachments.
+12. My Tasks page.
+13. Overview page.
+
+Ensure loading, error, empty, and success states are implemented.
+
+## 18. Testing & Deployment
+
+Before considering the project complete, test:
+
+- Admin login
+- Member login
+- User creation and invitation
+- User profile picture upload
+- App creation and editing
+- App icon upload
+- Version history creation
+- Updating the current app version
+- Board creation
+- Custom column creation and reordering
+- Task creation and assignment
+- Drag-and-drop functionality
+- Task comments
+- Attachment upload and download
+- App-to-task relationships
+- My Tasks filtering
+- RLS permissions
+- Unauthorized access prevention
+- Responsive layout
+
+Prepare the application for deployment on Vercel.
+
+Provide clear documentation for:
+- Supabase project setup
+- Environment variables
+- SQL schema execution
+- Storage bucket setup
+- Admin account creation
+- User invitation
+- Local development
+- Vercel deployment
+
+## 19. Final Development Instructions
+
+Work in the existing repository if one is provided. Inspect its current structure before changing anything.
+
+Do not overwrite working functionality without understanding it.
+
+Implement the application in logical phases, but complete the entire system.
+
+Prioritize a stable database structure, correct relationships, secure permissions, and fully functional CRUD operations before polishing the UI.
+
+The final result must be a production-ready internal company application for managing mobile apps, tracking versions and updates, managing team members, and assigning tasks through customizable Kanban boards.
+
+**Keep it simple, connected, secure, and genuinely usable by a small company team.**
