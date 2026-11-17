@@ -303,15 +303,25 @@ export async function createBoard(previousState, formData) {
         INSERT INTO public.board_sections (board_id, title, position)
         SELECT new_board.id, defaults.title, defaults.position - 1
         FROM new_board
-        CROSS JOIN unnest(ARRAY[
-          'Planning',
-          'Development',
-          'QA',
-          'Marketing',
-          'Uploaded at Developer Account',
-          'Completed'
-        ]::text[])
-          WITH ORDINALITY AS defaults(title, position)
+        CROSS JOIN (
+          SELECT title, ROW_NUMBER() OVER (ORDER BY MIN(sort_order), title) AS position
+          FROM (
+            SELECT title, sort_order
+            FROM unnest(ARRAY[
+              'Planning',
+              'Development',
+              'QA',
+              'Marketing',
+              'Uploaded at Developer Account',
+              'Completed'
+            ]::text[]) WITH ORDINALITY AS defaults(title, sort_order)
+            UNION ALL
+            SELECT DISTINCT btrim(existing.title), 1000
+            FROM public.board_sections existing
+            WHERE btrim(existing.title) <> ''
+          ) stage_names
+          GROUP BY title
+        ) defaults
       )
       SELECT id FROM new_board
     `,
@@ -390,6 +400,42 @@ export async function deleteSection(sectionId) {
 
   revalidateBoard(section.board_id);
   return { success: true, message: 'List deleted.' };
+}
+
+export async function createOverviewStage(title) {
+  const profile = await requireActiveProfile();
+  if (profile.role !== 'admin') return { success: false, message: 'Only admins can add stages.' };
+
+  const cleanTitle = String(title || '').trim();
+  if (!cleanTitle || cleanTitle.length > 80) {
+    return { success: false, message: 'Enter a stage name between 1 and 80 characters.' };
+  }
+
+  const result = await withDbTransaction(async (client) => {
+    const boards = await client.query('SELECT id FROM public.boards ORDER BY created_at, id FOR UPDATE');
+    if (boards.rows.length === 0) return { noBoards: true, boardIds: [] };
+
+    const duplicate = await client.query(
+      'SELECT 1 FROM public.board_sections WHERE lower(btrim(title)) = lower($1) LIMIT 1',
+      [cleanTitle]
+    );
+    if (duplicate.rows.length) return { conflict: true, boardIds: [] };
+
+    for (const board of boards.rows) {
+      await client.query(
+        `INSERT INTO public.board_sections (board_id, title, position)
+         VALUES ($1, $2, (SELECT COALESCE(MAX(position) + 1, 0) FROM public.board_sections WHERE board_id = $1))`,
+        [board.id, cleanTitle]
+      );
+    }
+    return { boardIds: boards.rows.map((board) => board.id) };
+  });
+
+  if (result.noBoards) return { success: false, message: 'Create a project board first, then add a workspace stage.' };
+  if (result.conflict) return { success: false, message: 'A stage with this name already exists.' };
+  for (const boardId of result.boardIds) revalidateBoard(boardId);
+  revalidatePath('/overview');
+  return { success: true, message: 'Stage added to all project boards.' };
 }
 
 export async function renameOverviewStage(stageKey, title) {
@@ -624,13 +670,17 @@ export async function createCard(sectionId, formData) {
     return { success: false, message: 'Choose the user assigned to this app, or an active member of this board.' };
   }
 
-  const attachmentFile = formData.get('file');
-  let validatedAttachment = null;
-  if (attachmentFile && typeof attachmentFile.arrayBuffer === 'function' && attachmentFile.name) {
+  const attachmentFiles = formData.getAll('files')
+    .filter((file) => file && typeof file.arrayBuffer === 'function' && file.name);
+  if (attachmentFiles.length > 10) {
+    return { success: false, message: 'Attach no more than 10 files to one ticket.' };
+  }
+  const validatedAttachments = [];
+  for (const file of attachmentFiles) {
     try {
-      validatedAttachment = await readTicketAttachment(attachmentFile);
+      validatedAttachments.push(await readTicketAttachment(file));
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: `${safeOriginalFilename(file.name)}: ${error.message}` };
     }
   }
 
@@ -684,7 +734,9 @@ export async function createCard(sectionId, formData) {
       `,
       [createdCard.id, sectionId, profile.id]
     );
-    if (validatedAttachment) {
+    for (let index = 0; index < validatedAttachments.length; index += 1) {
+      const file = attachmentFiles[index];
+      const attachment = validatedAttachments[index];
       await client.query(
         `
           INSERT INTO public.card_attachments
@@ -693,13 +745,13 @@ export async function createCard(sectionId, formData) {
         `,
         [
           createdCard.id,
-          safeOriginalFilename(attachmentFile.name),
-          createStoragePath(createdCard.id, attachmentFile),
-          validatedAttachment.contentType,
-          attachmentFile.size,
-          validatedAttachment.attachmentType,
+          safeOriginalFilename(file.name),
+          createStoragePath(createdCard.id, file),
+          attachment.contentType,
+          file.size,
+          attachment.attachmentType,
           profile.id,
-          validatedAttachment.bytes,
+          attachment.bytes,
         ]
       );
     }
