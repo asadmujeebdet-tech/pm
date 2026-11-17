@@ -18,7 +18,7 @@ function dateInputValue(value) {
 }
 
 // Mounted fresh each time the dialog opens, so fields and old errors never carry over.
-function AppForm({ app, members = [], onClose }) {
+function AppForm({ app, members = [], canAssignUsers, onClose }) {
   const router = useRouter();
   const [imageAddress, setImageAddress] = useState(app?.icon_url || '');
   const [state, formAction, isPending] = useActionState(async (previousState, formData) => {
@@ -65,40 +65,42 @@ function AppForm({ app, members = [], onClose }) {
           </span>
         </div>
       </div>
-      <fieldset disabled={isPending} className="space-y-2">
-        <legend className="text-sm font-medium text-[var(--foreground)]">Assigned user</legend>
-        <p className="text-xs text-[var(--muted)]">Each app has one responsible user. A user can own multiple apps.</p>
-        <div className="max-h-48 space-y-1 overflow-y-auto rounded-xl border border-[var(--border)] p-2">
-          <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-[var(--neutral)]">
-            <input type="radio" name="assignedUserId" value="" defaultChecked={!app?.assigned_user_id} className="accent-[var(--primary)]" />
-            <span>No responsible user</span>
-          </label>
-          {members.filter((member) => member.status === 'active' || member.id === app?.assigned_user_id).map((member) => (
-            <label key={member.id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-[var(--neutral)]">
-              <input
-                type="radio"
-                name="assignedUserId"
-                value={member.id}
-                defaultChecked={app?.assigned_user_id === member.id}
-                disabled={member.status !== 'active' && member.id !== app?.assigned_user_id}
-                className="accent-[var(--primary)]"
-              />
-              <Avatar
-                name={member.full_name || member.email}
-                src={member.avatar_path ? `/api/avatars/${member.id}` : undefined}
-                size="sm"
-              />
-              <span className="min-w-0 truncate">
-                {member.full_name || member.email}
-                {member.status !== 'active' && <span className="ml-1 text-[10px] text-[var(--muted)]">(inactive)</span>}
-              </span>
+      {canAssignUsers && (
+        <fieldset disabled={isPending} className="space-y-2">
+          <legend className="text-sm font-medium text-[var(--foreground)]">Assigned user</legend>
+          <p className="text-xs text-[var(--muted)]">Each app has one responsible user. A user can own multiple apps.</p>
+          <div className="max-h-48 space-y-1 overflow-y-auto rounded-xl border border-[var(--border)] p-2">
+            <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-[var(--neutral)]">
+              <input type="radio" name="assignedUserId" value="" defaultChecked={!app?.assigned_user_id} className="accent-[var(--primary)]" />
+              <span>No responsible user</span>
             </label>
-          ))}
-          {!members.some((member) => member.status === 'active') && (
-            <p className="px-2 py-3 text-xs text-[var(--muted)]">Create an active user before assigning this app.</p>
-          )}
-        </div>
-      </fieldset>
+            {members.filter((member) => member.status === 'active' || member.id === app?.assigned_user_id).map((member) => (
+              <label key={member.id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-[var(--neutral)]">
+                <input
+                  type="radio"
+                  name="assignedUserId"
+                  value={member.id}
+                  defaultChecked={app?.assigned_user_id === member.id}
+                  disabled={member.status !== 'active' && member.id !== app?.assigned_user_id}
+                  className="accent-[var(--primary)]"
+                />
+                <Avatar
+                  name={member.full_name || member.email}
+                  src={member.avatar_path ? `/api/avatars/${member.id}` : undefined}
+                  size="sm"
+                />
+                <span className="min-w-0 truncate">
+                  {member.full_name || member.email}
+                  {member.status !== 'active' && <span className="ml-1 text-[10px] text-[var(--muted)]">(inactive)</span>}
+                </span>
+              </label>
+            ))}
+            {!members.some((member) => member.status === 'active') && (
+              <p className="px-2 py-3 text-xs text-[var(--muted)]">Create an active user before assigning this app.</p>
+            )}
+          </div>
+        </fieldset>
+      )}
       <TextField label="Latest Version" name="latestVersion" maxLength={80} disabled={isPending} placeholder="1.0.0" autoComplete="off" defaultValue={app?.current_version_name || ''} />
       <TextField label="Last Release" name="lastRelease" type="date" disabled={isPending} defaultValue={dateInputValue(app?.latest_release_date)} />
 
@@ -112,7 +114,7 @@ function AppForm({ app, members = [], onClose }) {
   );
 }
 
-export default function CreateAppForm({ app, members = [], variant = 'primary' }) {
+export default function CreateAppForm({ app, members = [], variant = 'primary', canAssignUsers = false }) {
   const [isOpen, setIsOpen] = useState(false);
   const isEditing = Boolean(app);
 
@@ -124,7 +126,7 @@ export default function CreateAppForm({ app, members = [], variant = 'primary' }
       </button>
 
       <Modal open={isOpen} onClose={() => setIsOpen(false)} title={isEditing ? 'Edit app' : 'Add App'} description="Manage the app name, URL, icon, version, and release date.">
-        <AppForm key={app?.id || 'new-app'} app={app} members={members} onClose={() => setIsOpen(false)} />
+        <AppForm key={app?.id || 'new-app'} app={app} members={members} canAssignUsers={canAssignUsers} onClose={() => setIsOpen(false)} />
       </Modal>
     </>
   );

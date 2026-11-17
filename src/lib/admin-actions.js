@@ -2,7 +2,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
-import { hashPassword, requireAdmin } from '@/lib/auth';
+import { hashPassword, requireActiveProfile, requireAdmin } from '@/lib/auth';
 import { queryDb, withDbTransaction } from '@/lib/db';
 import { parsePlayStoreUrl } from '@/lib/play-store';
 import { createStoragePath, readProfileImage } from '@/lib/uploads';
@@ -400,7 +400,7 @@ function readAppFields(formData) {
 }
 
 export async function createApp(_previousState, formData) {
-  const admin = await requireAdmin();
+  const profile = await requireActiveProfile();
 
   let fields;
   try {
@@ -409,8 +409,10 @@ export async function createApp(_previousState, formData) {
     return { success: false, message: error.message };
   }
 
-  let assignedUserId;
-  try { assignedUserId = readAssignedUserId(formData); } catch (error) { return { success: false, message: error.message }; }
+  let assignedUserId = profile.id;
+  if (profile.role === 'admin') {
+    try { assignedUserId = readAssignedUserId(formData); } catch (error) { return { success: false, message: error.message }; }
+  }
   const appId = randomUUID();
   try {
     await withDbTransaction(async (client) => {
@@ -435,7 +437,7 @@ export async function createApp(_previousState, formData) {
       fields.imageUrl,
       fields.latestVersion || null,
       fields.lastRelease,
-      admin.id,
+      profile.id,
     ]
       );
       if (assignedUserId) await client.query('INSERT INTO public.app_members (app_id, profile_id) VALUES ($1, $2)', [appId, assignedUserId]);

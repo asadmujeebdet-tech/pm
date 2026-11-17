@@ -27,15 +27,15 @@ async function AppsContent() {
         eyebrow="Portfolio"
         title="Apps"
         description={apps.length > 0 ? `${apps.length} ${apps.length === 1 ? 'app' : 'apps'} · manage app details and releases.` : 'Manage company apps, their versions, and release history.'}
-        actions={apps.length > 0 && profile.role === 'admin' ? <CreateAppForm members={members} /> : null}
+        actions={apps.length > 0 ? <CreateAppForm members={members} canAssignUsers={profile.role === 'admin'} /> : null}
       />
 
       {apps.length === 0 ? (
         <EmptyState
           icon={BriefcaseBusiness}
           title="No apps yet"
-          description="Add the first app to start tracking versions, releases, and related tasks."
-          action={profile.role === 'admin' ? <CreateAppForm members={members} /> : null}
+          description="Add an app to start tracking versions, releases, and related tasks."
+          action={<CreateAppForm members={members} canAssignUsers={profile.role === 'admin'} />}
         />
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
