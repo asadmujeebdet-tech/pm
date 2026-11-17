@@ -695,3 +695,45 @@ h1,h2,h3{letter-spacing:-0.015em}
 .stage-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-pop); }
 .stage-card:active { cursor: grabbing; }
 .stage-history { animation: login-field-in 0.25s ease-out both; }
+
+.overview-metric {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+  padding: 1rem 1.125rem;
+  box-shadow: var(--shadow-soft);
+  transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+.overview-metric:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: 0 12px 28px -20px rgba(15, 23, 42, 0.4);
+}
+.overview-metric-icon {
+  display: flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.8rem;
+}
+.overview-metric-icon-primary { color: var(--primary); background: var(--primary-soft); }
+.overview-metric-icon-blue { color: #2563eb; background: rgba(59, 130, 246, 0.12); }
+.overview-metric-icon-amber { color: #b45309; background: rgba(245, 158, 11, 0.14); }
+html[data-theme='dark'] .overview-metric-icon-blue { color: #93c5fd; }
+html[data-theme='dark'] .overview-metric-icon-amber { color: #fcd34d; }
+.overview-metric-label { color: var(--muted); font-size: 0.75rem; font-weight: 500; }
+.overview-metric-value { margin-top: 0.2rem; color: var(--foreground); font-size: 1.35rem; font-weight: 650; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.overview-metric-note { margin-left: auto; color: var(--muted); font-size: 0.6875rem; white-space: nowrap; }
+
+@media (max-width: 639px) {
+  .overview-metric-note { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .overview-metric:hover { transform: none; }
+}

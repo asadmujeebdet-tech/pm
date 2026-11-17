@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Check, ChevronDown, Clock, GripVertical, History, Pencil, Trash2, X } from 'lucide-react';
+import { Check, ChevronDown, Clock, GripVertical, History, Pencil, Search, Trash2, X } from 'lucide-react';
 import { deleteOverviewStage, moveCard, renameOverviewStage, reorderOverviewStages } from '@/lib/board-actions';
 import { FormMessage } from '@/components/ui/Field';
 
@@ -104,6 +104,8 @@ export default function StageBoard({ stages, cards: initialCards, sectionMap, is
   const [message, setMessage] = useState('');
   const [editingStage, setEditingStage] = useState(null);
   const [stageTitle, setStageTitle] = useState('');
+  const [query, setQuery] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState('all');
 
   const [seen, setSeen] = useState(initialCards);
   if (seen !== initialCards) {
@@ -117,9 +119,16 @@ export default function StageBoard({ stages, cards: initialCards, sectionMap, is
 
   const byStage = useMemo(() => {
     const map = new Map(stages.map((stage) => [stage.key, []]));
-    for (const card of cards) map.get(card.stage_key)?.push(card);
+    const normalizedQuery = query.trim().toLowerCase();
+    for (const card of cards) {
+      const matchesQuery = !normalizedQuery || [card.title, card.app_name, card.board_name, String(card.ticket_number)]
+        .some((value) => String(value || '').toLowerCase().includes(normalizedQuery));
+      const matchesPriority = priorityFilter === 'all'
+        || (priorityFilter === 'critical' ? ['urgent', 'critical'].includes(card.priority) : card.priority === priorityFilter);
+      if (matchesQuery && matchesPriority) map.get(card.stage_key)?.push(card);
+    }
     return map;
-  }, [cards, stages]);
+  }, [cards, stages, query, priorityFilter]);
 
   async function handleMove(card, targetKey) {
     if (busy || card.stage_key === targetKey) return;
@@ -234,9 +243,45 @@ export default function StageBoard({ stages, cards: initialCards, sectionMap, is
     }
   }
 
+  const visibleCount = [...byStage.values()].reduce((total, list) => total + list.length, 0);
+
   return (
     <div>
       <FormMessage state={{ success: false, message }} />
+      <section aria-label="Filter tickets" className="mb-4 flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 shadow-[var(--shadow-soft)] sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative min-w-0 flex-1 sm:max-w-sm">
+          <Search size={16} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
+          <label className="sr-only" htmlFor="stage-ticket-search">Search tickets</label>
+          <input
+            id="stage-ticket-search"
+            type="search"
+            className="field field-with-icon min-h-10 rounded-xl border-transparent bg-[var(--bg)] text-sm"
+            placeholder="Search tickets, apps, or boards"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-2" aria-label="Filter by priority">
+          <span className="mr-1 text-xs font-medium text-[var(--muted)]">Priority</span>
+          {[
+            ['all', 'All'],
+            ['critical', 'Critical'],
+            ['high', 'High'],
+            ['medium', 'Medium'],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={priorityFilter === value}
+              onClick={() => setPriorityFilter(value)}
+              className={`chip ${priorityFilter === value ? 'chip-active' : ''}`}
+            >
+              {label}
+            </button>
+          ))}
+          <span className="ml-1 text-xs tabular-nums text-[var(--muted)]" aria-live="polite">{visibleCount} / {cards.length}</span>
+        </div>
+      </section>
       <div className="mt-2 flex gap-4 overflow-x-auto pb-4" role="list" aria-label="Workflow stages">
         {stages.map((stage, index) => {
           const list = byStage.get(stage.key) || [];
@@ -337,7 +382,7 @@ export default function StageBoard({ stages, cards: initialCards, sectionMap, is
                 ))}
                 {list.length === 0 && (
                   <li className="rounded-xl border border-dashed border-[var(--border-strong)] px-3 py-6 text-center text-xs text-[var(--muted)]">
-                    Drop a ticket here
+                    {query || priorityFilter !== 'all' ? 'No matching tickets' : 'Drop a ticket here'}
                   </li>
                 )}
               </ul>

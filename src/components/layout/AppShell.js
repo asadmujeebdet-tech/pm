@@ -68,11 +68,15 @@ function useTheme() {
 
 function Brand() {
   return (
-    <Link href="/overview" className="flex items-center gap-3 rounded-lg">
-      <span aria-hidden="true" className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primary)] text-sm font-bold text-[var(--primary-foreground)] shadow-[var(--shadow-soft)]">
+    <Link href="/overview" className="flex items-center gap-3 rounded-xl outline-offset-4">
+      <span aria-hidden="true" className="flex h-9 w-9 items-center justify-center rounded-xl bg-[linear-gradient(145deg,var(--primary),#6366f1)] text-xs font-bold tracking-tight text-[var(--primary-foreground)] shadow-[0_6px_18px_-6px_var(--ring)]">
         PM
       </span>
-      <span className="text-[15px] font-semibold tracking-tight">Project Management</span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-semibold tracking-tight">Project Manager</span>
+        <span className="mt-0.5 block text-[11px] text-[var(--muted)]">Team workspace</span>
+      </span>
+      <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[var(--success)] ring-4 ring-[var(--success)]/10" />
     </Link>
   );
 }
@@ -80,14 +84,14 @@ function Brand() {
 function SidebarContent({ groups, activeHref, user, onNavigate }) {
   return (
     <>
-      <div className="px-5 py-5">
+      <div className="border-b border-[var(--border)] px-4 py-5">
         <Brand />
       </div>
 
-      <nav aria-label="Main" className="flex-1 overflow-y-auto px-3 pb-4 pt-1">
+      <nav aria-label="Main" className="flex-1 overflow-y-auto px-3 pb-4 pt-5">
         {groups.map((g, gi) => (
-          <div key={g.group}>
-            {gi > 0 && <div className="nav-divider" aria-hidden="true" />}
+          <div key={g.group} className={gi > 0 ? 'mt-6' : ''}>
+            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">{g.group}</p>
             <ul className="space-y-1">
               {g.items.map((item, ii) => {
                 const Icon = item.icon;
