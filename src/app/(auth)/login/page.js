@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { connection } from 'next/server';
 import { ShieldCheck, TriangleAlert } from 'lucide-react';
 import LoginForm from '@/components/forms/LoginForm';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -7,12 +8,14 @@ import { hasDatabaseConnection } from '@/lib/db';
 
 export const metadata = { title: 'Sign in' };
 
-async function LoginContent() {
+async function LoginContent({ searchParams }) {
+  await connection();
+  const query = await searchParams;
   const databaseConfigured = hasDatabaseConnection();
   let needsSetup = false;
   let databaseIssue = '';
 
-  if (databaseConfigured) {
+  if (databaseConfigured && query.loggedOut !== '1') {
     try {
       needsSetup = !(await hasAnyProfiles());
     } catch (error) {
@@ -78,7 +81,7 @@ function LoginSkeleton() {
   );
 }
 
-export default function LoginPage() {
+export default function LoginPage({ searchParams }) {
   return (
     <main className="login-page relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[var(--bg)] px-4 py-12">
       <div aria-hidden="true" className="login-glow pointer-events-none absolute inset-0 z-0" />
@@ -91,7 +94,7 @@ export default function LoginPage() {
       </div>
       <Suspense fallback={<LoginSkeleton />}>
         <div className="login-card-wrap relative z-10 flex w-full justify-center">
-          <LoginContent />
+          <LoginContent searchParams={searchParams} />
         </div>
       </Suspense>
       <p className="relative z-10 mt-6 text-center text-xs text-[var(--muted)]">Secure access for your company team</p>

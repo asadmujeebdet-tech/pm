@@ -461,7 +461,7 @@ export async function updateApp(appId, formData) {
   }
 
   const rows = await queryDb(
-    'SELECT id, app_url, package_name FROM public.apps WHERE id = $1 LIMIT 1',
+    'SELECT id, app_url, package_name, icon_url FROM public.apps WHERE id = $1 LIMIT 1',
     [appId]
   );
   const current = rows[0];
@@ -506,7 +506,7 @@ export async function updateApp(appId, formData) {
       packageName,
       fields.playStore?.url || null,
       fields.playStoreAccount || null,
-      fields.imageUrl,
+      fields.imageUrl || current.icon_url,
       fields.latestVersion || null,
       fields.lastRelease,
     ]

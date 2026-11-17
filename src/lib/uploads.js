@@ -52,13 +52,21 @@ async function readFile(file, maxBytes, expectedType) {
     && bytes[1] === 0x4b
     && [0x03, 0x05, 0x07].includes(bytes[2])
     && [0x04, 0x06, 0x08].includes(bytes[3]);
-  if (getFileExtension(file.name) !== '.apk' || !isZip) {
-    throw new Error('Upload a valid APK file.');
+  if (expectedType === 'apk') {
+    if (getFileExtension(file.name) !== '.apk' || !isZip) {
+      throw new Error('Upload a valid APK file.');
+    }
+    return {
+      bytes,
+      contentType: 'application/vnd.android.package-archive',
+      attachmentType: 'apk',
+    };
   }
+
   return {
     bytes,
-    contentType: 'application/vnd.android.package-archive',
-    attachmentType: 'apk',
+    contentType: 'application/octet-stream',
+    attachmentType: 'file',
   };
 }
 
@@ -71,10 +79,13 @@ export async function readAppIcon(file) {
 }
 
 export async function readTicketAttachment(file) {
-  if (file?.type?.startsWith('image/')) {
+  if (Object.hasOwn(IMAGE_TYPES, file?.type)) {
     return readFile(file, 10 * 1024 * 1024, 'image');
   }
-  return readFile(file, 50 * 1024 * 1024, 'apk');
+  if (file?.type === 'application/vnd.android.package-archive' || getFileExtension(file?.name) === '.apk') {
+    return readFile(file, 50 * 1024 * 1024, 'apk');
+  }
+  return readFile(file, 50 * 1024 * 1024, 'file');
 }
 
 export function createStoragePath(ownerId, file) {

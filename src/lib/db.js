@@ -160,6 +160,15 @@ export async function getAppDetails(appId, profile) {
   const app = apps[0];
   if (!app) return null;
 
+  return {
+    ...app,
+    icon_url: sanitizeImageUrl(app.icon_url),
+    app_url: sanitizeAppUrl(app.app_url) || sanitizePlayStoreUrl(app.google_play_url),
+    google_play_url: sanitizePlayStoreUrl(app.google_play_url),
+  };
+}
+
+export async function getAppDetailsActivity(appId, profile) {
   const visibleCards = `
     FROM public.cards c
     JOIN public.boards b ON b.id = c.board_id
@@ -253,15 +262,9 @@ export async function getAppDetails(appId, profile) {
   ].sort((left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime()).slice(0, 10);
 
   return {
-    ...app,
-    icon_url: sanitizeImageUrl(app.icon_url),
-    app_url: sanitizeAppUrl(app.app_url) || sanitizePlayStoreUrl(app.google_play_url),
-    google_play_url: sanitizePlayStoreUrl(app.google_play_url),
     ticket_count: Number(ticketCount[0]?.count || 0),
     status_distribution: statusDistribution,
     tickets,
-    updates,
-    recent_comments: recentComments,
     recent_activity: recentActivity,
   };
 }
@@ -568,7 +571,7 @@ export async function getBoardData(boardId, profile) {
   };
 }
 
-export async function getMyTasks(profileId, role) {
+export async function getMyTasks(profileId) {
   const tasks = await queryDb(
     `
       SELECT
@@ -578,12 +581,17 @@ export async function getMyTasks(profileId, role) {
         c.description,
         c.priority,
         c.due_date,
+        COALESCE(c.app_id, b.app_id) AS app_id,
+        a.name AS app_name,
+        a.icon_url AS app_icon_url,
+        CASE WHEN a.icon_data IS NOT NULL THEN a.icon_path END AS app_icon_path,
         b.id AS board_id,
         b.name AS board_name,
         s.title AS section_name
       FROM public.cards c
       JOIN public.boards b ON b.id = c.board_id
       JOIN public.board_sections s ON s.id = c.section_id
+      LEFT JOIN public.apps a ON a.id = COALESCE(c.app_id, b.app_id)
       WHERE c.assignee_id = $1
         OR EXISTS (SELECT 1 FROM public.card_assignees ca WHERE ca.card_id = c.id AND ca.profile_id = $1)
       ORDER BY c.due_date ASC NULLS LAST, c.updated_at DESC
@@ -593,8 +601,7 @@ export async function getMyTasks(profileId, role) {
   );
   return tasks.map((task) => ({
     ...task,
-    priority: role === 'admin' ? task.priority : null,
-    due_date: role === 'admin' ? task.due_date : null,
+    app_icon_url: sanitizeImageUrl(task.app_icon_url),
     description: sanitizeDescription(task.description),
   }));
 }

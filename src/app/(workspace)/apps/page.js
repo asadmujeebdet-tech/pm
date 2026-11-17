@@ -14,8 +14,12 @@ export const metadata = { title: 'Apps' };
 
 async function AppsContent() {
   const profile = await requireActiveProfile();
-  const apps = hasDatabaseConnection() ? await getApps(profile) : [];
-  const members = hasDatabaseConnection() && profile.role === 'admin' ? await getMembers() : [];
+  const [apps, members] = hasDatabaseConnection()
+    ? await Promise.all([
+        getApps(profile),
+        profile.role === 'admin' ? getMembers() : Promise.resolve([]),
+      ])
+    : [[], []];
 
   return (
     <>

@@ -16,7 +16,7 @@ async function OverviewContent() {
   const isConnected = hasDatabaseConnection();
   const statsData = isConnected ? await getOverviewStats(profile) : { totalApps: 0, activeApps: 0, totalMembers: 0, totalTasks: 0 };
   const recentApps = isConnected ? await getRecentAppActivity(profile) : [];
-  const myTasks = isConnected ? await getMyTasks(profile.id, profile.role) : [];
+  const myTasks = isConnected ? await getMyTasks(profile.id) : [];
 
   const totalApps = Number(statsData.totalApps) || 0;
   const activeApps = Number(statsData.activeApps) || 0;

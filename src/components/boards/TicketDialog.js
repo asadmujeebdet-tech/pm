@@ -633,14 +633,14 @@ export default function TicketDialog({
             )}
             {canEdit && (
               <form onSubmit={uploadFile} encType="multipart/form-data" className="space-y-2">
-                <label htmlFor="ticket-file" className="block text-sm font-medium text-[var(--foreground)]">Upload screenshot or APK</label>
+                <label htmlFor="ticket-file" className="block text-sm font-medium text-[var(--foreground)]">Upload a file</label>
                 <div className="flex min-w-0 items-center gap-2">
-                  <input id="ticket-file" name="file" type="file" required accept="image/png,image/jpeg,image/webp,.apk,application/vnd.android.package-archive" disabled={pending} className="field min-w-0 flex-1 file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--primary-soft)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[var(--primary)]" />
+                  <input id="ticket-file" name="file" type="file" required disabled={pending} className="field min-w-0 flex-1 file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--primary-soft)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[var(--primary)]" />
                   <button type="submit" disabled={pending} className="btn btn-secondary min-h-10 shrink-0">
                     <FileUp size={15} aria-hidden="true" /> Upload
                   </button>
                 </div>
-                <p className="text-xs text-[var(--muted)]">Images up to 10 MB; APKs up to 50 MB.</p>
+                <p className="text-xs text-[var(--muted)]">Images up to 10 MB; other files up to 50 MB.</p>
               </form>
             )}
           </section>

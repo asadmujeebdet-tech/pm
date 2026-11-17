@@ -56,7 +56,7 @@ function AppForm({ app, members = [], onClose }) {
           autoComplete="url"
           value={imageAddress}
           onChange={(event) => setImageAddress(event.target.value)}
-          hint="Use a direct HTTPS image address. A broken or empty image falls back to the app initials."
+          hint="Use a direct HTTPS image address. A blank or broken image falls back to the app initials."
         />
         <div className="mt-3 flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--neutral)] p-3">
           <AppIcon name={app?.name || 'App'} src={imageAddress} size="lg" />

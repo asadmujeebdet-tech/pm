@@ -38,8 +38,8 @@ export async function signIn(previousState, formData) {
 
 export async function signOut() {
   await clearLoginSession();
-  revalidatePath('/login');
-  redirect('/login');
+  revalidatePath('/', 'layout');
+  redirect('/login?loggedOut=1');
 }
 
 export async function createFirstAdmin(previousState, formData) {
