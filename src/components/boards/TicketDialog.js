@@ -271,7 +271,7 @@ function TicketForm({
               }}
               className="field min-h-11 file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--primary-soft)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[var(--primary)]"
             />
-            <p className="mt-1.5 text-xs text-[var(--muted)]">Select multiple files (up to 10). Images up to 10 MB each; other files up to 50 MB each.</p>
+            <p className="mt-1.5 text-xs text-[var(--muted)]">Select multiple files (up to 10). Images up to 10 MB each; total attachments must stay within 50 MB.</p>
             {selectedFiles.length > 0 && (
               <ul className="mt-3 space-y-2" aria-label="Selected attachments">
                 {selectedFiles.map((file, index) => (
