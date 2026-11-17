@@ -312,8 +312,8 @@ function TicketForm({
       {error && <FormMessage state={{ success: false, message: error }} />}
       {showActions && (
         <div className="flex items-center justify-end gap-2 border-t border-[var(--border)] pt-4">
-          <button type="button" onClick={onCancel} disabled={pending} className="btn btn-secondary">Cancel</button>
-          <button type="submit" disabled={pending} className="btn btn-primary">
+          <button type="button" onClick={onCancel} disabled={pending} className="btn btn-secondary transition-all hover:-translate-y-px hover:shadow-sm">Cancel</button>
+          <button type="submit" disabled={pending} className="btn btn-primary transition-all hover:-translate-y-px hover:shadow-md">
             {pending ? 'Saving…' : submitLabel}
           </button>
         </div>
@@ -373,7 +373,7 @@ export function CreateTicketDialog({ sections = [], boards, apps, members, canAs
           onSubmit={submit}
           onCancel={() => setOpen(false)}
           error={error}
-          submitLabel="Create ticket"
+          submitLabel="Save Ticket"
         />
       </Modal>
     </>
