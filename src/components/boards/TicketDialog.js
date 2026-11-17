@@ -259,17 +259,15 @@ function TicketForm({
               disabled={pending || selectedFiles.length >= 10}
               onChange={(event) => {
                 const incoming = Array.from(event.target.files || []);
-                setSelectedFiles((current) => {
-                  const next = [...current];
-                  for (const file of incoming) {
-                    if (next.length >= 10) break;
-                    if (!next.some((item) => item.name === file.name && item.size === file.size && item.lastModified === file.lastModified)) next.push(file);
-                  }
-                  const transfer = new DataTransfer();
-                  next.forEach((file) => transfer.items.add(file));
-                  if (fileInputRef.current) fileInputRef.current.files = transfer.files;
-                  return next;
-                });
+                const next = [...selectedFiles];
+                for (const file of incoming) {
+                  if (next.length >= 10) break;
+                  if (!next.some((item) => item.name === file.name && item.size === file.size && item.lastModified === file.lastModified)) next.push(file);
+                }
+                const transfer = new DataTransfer();
+                next.forEach((file) => transfer.items.add(file));
+                if (fileInputRef.current) fileInputRef.current.files = transfer.files;
+                setSelectedFiles(next);
               }}
               className="field min-h-11 file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--primary-soft)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[var(--primary)]"
             />
@@ -285,13 +283,13 @@ function TicketForm({
                     </span>
                     <button
                       type="button"
-                      onClick={() => setSelectedFiles((current) => {
-                        const next = current.filter((_, itemIndex) => itemIndex !== index);
+                      onClick={() => {
+                        const next = selectedFiles.filter((_, itemIndex) => itemIndex !== index);
                         const transfer = new DataTransfer();
                         next.forEach((file) => transfer.items.add(file));
                         if (fileInputRef.current) fileInputRef.current.files = transfer.files;
-                        return next;
-                      })}
+                        setSelectedFiles(next);
+                      }}
                       disabled={pending}
                       className="btn btn-ghost btn-icon min-h-9 min-w-9 text-rose-600 transition-colors hover:bg-rose-500/10 hover:text-rose-700"
                       aria-label={`Remove ${file.name}`}
